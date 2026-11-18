@@ -1,0 +1,61 @@
+name: Uchidake
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  Uchidake:
+    type: application
+    platform: iOS
+    sources: [Uchidake]
+    info:
+      path: Uchidake/Info.plist
+      properties:
+        CFBundleDisplayName: うちだけカメラ
+        UILaunchScreen: {}
+        # ローカルネットワーク利用の許可ダイアログに表示される文言
+        NSLocalNetworkUsageDescription: 家の中にあるカメラと、映像を見る端末をつなぐために、ローカルネットワークを使用します。
+        # Bonjourで広告・探索するサービス種別（MediaSecurity.serviceType と一致させる）
+        NSBonjourServices:
+          - _uchidake._udp
+        NSCameraUsageDescription: この iPhone を見守りカメラにして、家の中の別の端末に映像を送るためにカメラを使用します。
+        NSMicrophoneUsageDescription: カメラのまわりの音を家の中の別の端末に送るため、また映像を見ながら話しかけるためにマイクを使用します。
+        # 見る側が、アプリを閉じても音を聞き続けられるようにする
+        UIBackgroundModes:
+          - audio
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+  UchidakeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [UchidakeTests]
+    dependencies:
+      - target: Uchidake
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Uchidake:
+    build:
+      targets:
+        Uchidake: all
+    run:
+      config: Debug
+    test:
+      targets:
+        - UchidakeTests
