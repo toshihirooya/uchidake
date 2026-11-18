@@ -59,9 +59,12 @@ final class AppModel {
     func startCamera(name: String) {
         guard let key else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let station = CameraStation(name: trimmed.isEmpty ? Self.defaultCameraName : String(trimmed.prefix(20)), key: key)
+        let cameraName = trimmed.isEmpty ? Self.defaultCameraName : String(trimmed.prefix(20))
+        let station = CameraStation(name: cameraName, key: key)
         mode = .camera(station)
+        // 次に開いたとき、同じ名前のカメラとして戻れるように覚えておく
         UserDefaults.standard.set("camera", forKey: Self.lastRoleKey)
+        UserDefaults.standard.set(cameraName, forKey: Self.cameraNameKey)
         // カメラは開いたままで使うので、画面の自動ロックを止める
         UIApplication.shared.isIdleTimerDisabled = true
     }

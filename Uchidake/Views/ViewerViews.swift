@@ -150,7 +150,7 @@ struct LiveView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(session.cameraName)
                     .font(.headline)
-                if let status = session.status {
+                if session.isLive, let status = session.status {
                     HStack(spacing: 10) {
                         if let battery = status.battery {
                             Label("\(battery)%", systemImage: status.isCharging ? "battery.100.bolt" : "battery.50")
