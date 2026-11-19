@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		25B49C2E36793C501EC8F513 /* PassphraseKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BA8EEBBE6369BC050D2F22 /* PassphraseKey.swift */; };
+		36CF99F1CB71D4413081E8A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */; };
 		395C79FF973023DC59CE3687 /* ViewerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF63E9D5AC1C35BC86F20333 /* ViewerEngine.swift */; };
 		3AB0792645406236A25B1205 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C77C72C46580053FB3D12C /* CameraEngine.swift */; };
 		45BB58B07B6E896892BBF0AE /* MediaPacketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */; };
@@ -42,6 +43,7 @@
 		30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerSession.swift; sourceTree = "<group>"; };
 		30D5BC622370954A7238CFF1 /* AudioPipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPipe.swift; sourceTree = "<group>"; };
 		32BA8EEBBE6369BC050D2F22 /* PassphraseKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassphraseKey.swift; sourceTree = "<group>"; };
+		4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacketTests.swift; sourceTree = "<group>"; };
 		859E8D611D2E2E748F18B2B3 /* CameraStation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStation.swift; sourceTree = "<group>"; };
 		A269DFCEE68594D882CF5D37 /* VideoCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCodec.swift; sourceTree = "<group>"; };
@@ -67,6 +69,7 @@
 		049105FE4EEF06E9D59E0565 /* Uchidake */ = {
 			isa = PBXGroup;
 			children = (
+				4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */,
 				A640931916AC7D858635765C /* Info.plist */,
 				1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */,
 				51AE45D9575C1415089E76B6 /* Camera */,
@@ -152,6 +155,7 @@
 			buildConfigurationList = BF7D945C37B1FCB82B0DC14B /* Build configuration list for PBXNativeTarget "Uchidake" */;
 			buildPhases = (
 				648D8C973FD138B986660E7C /* Sources */,
+				5FF2980DF2C8E215F6998B3B /* Resources */,
 			);
 			buildRules = (
 			);
@@ -215,6 +219,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5FF2980DF2C8E215F6998B3B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36CF99F1CB71D4413081E8A3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0B3BABFC4F607596760D23D5 /* Sources */ = {
