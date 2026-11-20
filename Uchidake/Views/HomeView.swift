@@ -4,7 +4,8 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppModel.self) private var model
     @AppStorage(AppModel.cameraNameKey) private var cameraName = AppModel.defaultCameraName
-    @State private var changingPassphrase = false
+    @State private var showingCode = false
+    @State private var confirmingReset = false
 
     var body: some View {
         ZStack {
@@ -27,12 +28,20 @@ struct HomeView: View {
                     viewerCard
                     cameraCard
 
-                    Button("合言葉を変更") {
-                        changingPassphrase = true
+                    Button {
+                        showingCode = true
+                    } label: {
+                        Label("端末を追加", systemImage: "qrcode")
+                    }
+                    .font(.callout)
+                    .tint(Theme.accent)
+                    .padding(.top, 4)
+
+                    Button("設定をやり直す") {
+                        confirmingReset = true
                     }
                     .font(.footnote)
                     .tint(.secondary)
-                    .padding(.top, 4)
                 }
                 .frame(maxWidth: 440)
                 .padding()
@@ -40,8 +49,19 @@ struct HomeView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
-        .sheet(isPresented: $changingPassphrase) {
-            PassphraseView(isChange: true)
+        .sheet(isPresented: $showingCode) {
+            PairingCodeView()
+        }
+        .confirmationDialog(
+            "この端末の鍵を消して、最初の設定からやり直します。",
+            isPresented: $confirmingReset, titleVisibility: .visible
+        ) {
+            Button("鍵を消してやり直す", role: .destructive) {
+                model.resetKey()
+            }
+            Button("やめる", role: .cancel) {}
+        } message: {
+            Text("ほかの端末とは、同じ QR コードで設定し直すまでつながらなくなります。")
         }
     }
 
@@ -91,97 +111,5 @@ struct HomeView: View {
         }
         .padding(20)
         .background(Theme.panel, in: RoundedRectangle(cornerRadius: 20))
-    }
-}
-
-/// 合言葉の設定。初回は必ずここを通る。
-struct PassphraseView: View {
-    /// すでに設定済みで、変更のために開いているか
-    let isChange: Bool
-    @Environment(AppModel.self) private var model
-    @Environment(\.dismiss) private var dismiss
-    @State private var passphrase = ""
-    @State private var isSaving = false
-    @State private var failed = false
-
-    var body: some View {
-        ZStack {
-            Theme.background.ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Image(systemName: "key.fill")
-                        .font(.system(size: 36))
-                        .foregroundStyle(Theme.accent)
-                    Text(isChange ? "合言葉を変更" : "合言葉を決める")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                    Text("カメラにする端末と、映像を見る端末のすべてに、同じ合言葉を入れてください。合言葉が同じ端末どうしだけがつながり、通信は暗号化されます。")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-
-                    TextField("合言葉（\(PassphraseKey.minimumLength)文字以上）", text: $passphrase)
-                        .textFieldStyle(.roundedBorder)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .font(.title3.monospaced())
-
-                    Button("自動で作る") {
-                        passphrase = PassphraseKey.suggestion()
-                    }
-                    .font(.callout)
-                    .tint(Theme.accent)
-
-                    if isChange {
-                        Text("変更すると、ほかの端末にも同じ合言葉を入れ直すまでつながらなくなります。")
-                            .font(.footnote)
-                            .foregroundStyle(Theme.warning)
-                    }
-                    if failed {
-                        Text("合言葉を保存できませんでした。もう一度試してください。")
-                            .font(.footnote)
-                            .foregroundStyle(Theme.warning)
-                    }
-
-                    Button {
-                        isSaving = true
-                        failed = false
-                        Task {
-                            let saved = await model.setPassphrase(passphrase)
-                            isSaving = false
-                            if saved {
-                                if isChange { dismiss() }
-                            } else {
-                                failed = true
-                            }
-                        }
-                    } label: {
-                        Group {
-                            if isSaving {
-                                ProgressView()
-                            } else {
-                                Text("この合言葉にする")
-                                    .font(.headline)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Theme.accent)
-                    .foregroundStyle(.black)
-                    .disabled(!PassphraseKey.isValid(passphrase) || isSaving)
-
-                    if isChange {
-                        Button("やめる") { dismiss() }
-                            .frame(maxWidth: .infinity)
-                            .tint(.secondary)
-                    }
-                }
-                .frame(maxWidth: 440)
-                .padding(24)
-                .frame(maxWidth: .infinity)
-            }
-            .scrollDismissesKeyboard(.interactively)
-        }
-        .preferredColorScheme(.dark)
     }
 }

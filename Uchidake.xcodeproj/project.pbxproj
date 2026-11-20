@@ -7,12 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		25B49C2E36793C501EC8F513 /* PassphraseKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BA8EEBBE6369BC050D2F22 /* PassphraseKey.swift */; };
+		069AAB04A81FE68709C45871 /* PairingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF0EC401D5F86D9BB9DC7A5 /* PairingViews.swift */; };
 		36CF99F1CB71D4413081E8A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */; };
 		395C79FF973023DC59CE3687 /* ViewerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF63E9D5AC1C35BC86F20333 /* ViewerEngine.swift */; };
 		3AB0792645406236A25B1205 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C77C72C46580053FB3D12C /* CameraEngine.swift */; };
 		45BB58B07B6E896892BBF0AE /* MediaPacketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */; };
 		4D19CD42C55859AAC6FD80A3 /* UchidakeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */; };
+		5227BE173BE3D901FC7EAE77 /* PairingKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1902286F732938B6F1A6223F /* PairingKey.swift */; };
 		658D04A45DF787E1414EA37D /* MediaPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6F5B8C733560D808AC89B2 /* MediaPacket.swift */; };
 		773C71A56D588BEE9F823433 /* ViewerSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */; };
 		7A3FAB90F45708FA5E969F4C /* CameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040969DA06DC00C38782B55A /* CameraCapture.swift */; };
@@ -38,11 +39,11 @@
 /* Begin PBXFileReference section */
 		040969DA06DC00C38782B55A /* CameraCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCapture.swift; sourceTree = "<group>"; };
 		06E249BB5429BECCEFC87B68 /* VideoLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLayerView.swift; sourceTree = "<group>"; };
+		1902286F732938B6F1A6223F /* PairingKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingKey.swift; sourceTree = "<group>"; };
 		1D6F5B8C733560D808AC89B2 /* MediaPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacket.swift; sourceTree = "<group>"; };
 		1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UchidakeApp.swift; sourceTree = "<group>"; };
 		30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerSession.swift; sourceTree = "<group>"; };
 		30D5BC622370954A7238CFF1 /* AudioPipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPipe.swift; sourceTree = "<group>"; };
-		32BA8EEBBE6369BC050D2F22 /* PassphraseKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassphraseKey.swift; sourceTree = "<group>"; };
 		4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacketTests.swift; sourceTree = "<group>"; };
 		859E8D611D2E2E748F18B2B3 /* CameraStation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStation.swift; sourceTree = "<group>"; };
@@ -51,6 +52,7 @@
 		ADE1FDFF8D9966E4B54DCE48 /* UchidakeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = UchidakeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF63E9D5AC1C35BC86F20333 /* ViewerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerEngine.swift; sourceTree = "<group>"; };
 		B246059CA0951B09F8125BA3 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		BDF0EC401D5F86D9BB9DC7A5 /* PairingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingViews.swift; sourceTree = "<group>"; };
 		C7EBC867C3371D1FAAC693BA /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		D2C77C72C46580053FB3D12C /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
 		FB783C38B2BF93F83D6ED3CC /* Uchidake.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Uchidake.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,7 +63,7 @@
 		03AE56135D92D476C2AFAA50 /* Security */ = {
 			isa = PBXGroup;
 			children = (
-				32BA8EEBBE6369BC050D2F22 /* PassphraseKey.swift */,
+				1902286F732938B6F1A6223F /* PairingKey.swift */,
 			);
 			path = Security;
 			sourceTree = "<group>";
@@ -115,6 +117,7 @@
 			children = (
 				C7EBC867C3371D1FAAC693BA /* CameraView.swift */,
 				B246059CA0951B09F8125BA3 /* HomeView.swift */,
+				BDF0EC401D5F86D9BB9DC7A5 /* PairingViews.swift */,
 				06E249BB5429BECCEFC87B68 /* VideoLayerView.swift */,
 				FF36F9B742E3A1D2B617A3D2 /* ViewerViews.swift */,
 			);
@@ -251,7 +254,8 @@
 				80ECA356944C037A758F8CE7 /* CameraView.swift in Sources */,
 				A74F550F416B7327B344D357 /* HomeView.swift in Sources */,
 				658D04A45DF787E1414EA37D /* MediaPacket.swift in Sources */,
-				25B49C2E36793C501EC8F513 /* PassphraseKey.swift in Sources */,
+				5227BE173BE3D901FC7EAE77 /* PairingKey.swift in Sources */,
+				069AAB04A81FE68709C45871 /* PairingViews.swift in Sources */,
 				4D19CD42C55859AAC6FD80A3 /* UchidakeApp.swift in Sources */,
 				97578CB530815D032E2B4272 /* VideoCodec.swift in Sources */,
 				B28A4BCE3E3A4164EC85B1BD /* VideoLayerView.swift in Sources */,

@@ -194,7 +194,7 @@ final class CameraEngine {
             guard let self, let viewer else { return }
             switch newState {
             case .ready:
-                // DTLS のハンドシェイクが通った。合言葉が同じ端末。
+                // DTLS のハンドシェイクが通った。鍵が同じ端末。
                 viewer.isReady = true
                 viewer.lastHeard = Date()
                 self.receive(from: viewer)
@@ -265,7 +265,7 @@ final class CameraEngine {
 
     private func tick() {
         let now = Date()
-        // 準備中のまま進まない接続（合言葉が違う相手など）も、ここで片付ける
+        // 準備中のまま進まない接続（鍵が違う相手など）も、ここで片付ける
         for viewer in viewers where now.timeIntervalSince(viewer.lastHeard) > Self.viewerTimeout {
             remove(viewer)
         }

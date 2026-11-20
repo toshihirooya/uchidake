@@ -24,7 +24,7 @@ xcodegen generate
 
 ## テスト
 
-パケットの形式、映像の断片の組み立て、合言葉からの鍵の導出に単体テストがある。Xcode で ⌘U、またはコマンドラインで実行する。
+パケットの形式、映像の断片の組み立て、鍵と QR コードの中身の変換に単体テストがある。Xcode で ⌘U、またはコマンドラインで実行する。
 
 ```bash
 xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=iOS Simulator,name=iPhone Air' test
@@ -34,7 +34,7 @@ xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=i
 
 | 場所 | 中身 |
 |---|---|
-| `Uchidake/Security/` | 合言葉から作る鍵と、DTLS の設定。 |
+| `Uchidake/Security/` | 端末どうしで共有する鍵（QR コードで渡す）と、DTLS の設定。 |
 | `Uchidake/Media/` | パケットの形式、カメラの取り込み、H.264 の圧縮、音声。 |
 | `Uchidake/Camera/` | カメラ役。待ち受けて、見る側すべてに映像と音を送る。 |
 | `Uchidake/Viewer/` | 見る役。カメラを探してつなぎ、映像と音を受ける。 |
@@ -42,14 +42,18 @@ xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=i
 
 ## 画面を操作せずに動かす
 
-デバッグビルドには、検証用の起動オプションがある（[仕様の9章](docs/spec.md)）。シミュレータ 2 台で、カメラ役と見る役を動かす例:
+デバッグビルドには、検証用の起動オプションがある（[仕様の9章](docs/spec.md)）。シミュレータ 2 台で、カメラ役と見る役を動かす例。シミュレータでは QR コードを読み取れないので、先に検証用の鍵を作って両方に渡す:
 
 ```bash
-xcrun simctl launch --console <カメラ役の UDID> com.example.Uchidake -autoPassphrase test-pass-1234 -autoRole camera -autoName リビング
+KEY=$(head -c 32 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=')
 ```
 
 ```bash
-xcrun simctl launch --console <見る役の UDID> com.example.Uchidake -autoPassphrase test-pass-1234 -autoRole viewer
+xcrun simctl launch --console <カメラ役の UDID> com.example.Uchidake -autoKey "$KEY" -autoRole camera -autoName リビング
+```
+
+```bash
+xcrun simctl launch --console <見る役の UDID> com.example.Uchidake -autoKey "$KEY" -autoRole viewer
 ```
 
 `--console` を付けると、つながったことと受信したコマ数が `[Uchidake]` で始まる行に出る。シミュレータにはカメラもマイクも無いので、テスト画像と確認音のデータが流れる。

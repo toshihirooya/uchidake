@@ -18,7 +18,7 @@ targets:
         # Bonjourで広告・探索するサービス種別（MediaSecurity.serviceType と一致させる）
         NSBonjourServices:
           - _uchidake._udp
-        NSCameraUsageDescription: この iPhone を見守りカメラにして、家の中の別の端末に映像を送るためにカメラを使用します。
+        NSCameraUsageDescription: この iPhone を見守りカメラにして家の中の別の端末に映像を送るため、また端末を追加するときに QR コードを読み取るためにカメラを使用します。
         NSMicrophoneUsageDescription: カメラのまわりの音を家の中の別の端末に送るため、また映像を見ながら話しかけるためにマイクを使用します。
         # 見る側が、アプリを閉じても音を聞き続けられるようにする
         UIBackgroundModes:

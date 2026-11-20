@@ -194,7 +194,7 @@ struct LiveView: View {
             Text("カメラにつないでいます…")
                 .font(.headline)
             if session.failedAttempts > 0 {
-                Text("つながりません。この端末の合言葉がカメラと同じか、カメラの端末でアプリが開いているかを確かめてください。")
+                Text("つながりません。この端末をカメラと同じ QR コードで設定したか、カメラの端末でアプリが開いているかを確かめてください。")
                     .font(.footnote)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.warning)
