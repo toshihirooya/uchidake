@@ -24,7 +24,7 @@ struct ViewerListView: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 if let problem = finder.problem {
-                    Text(problem)
+                    Text(problem.message)
                         .font(.footnote)
                         .foregroundStyle(Theme.warning)
                 }
@@ -153,7 +153,11 @@ struct LiveView: View {
                 if session.isLive, let status = session.status {
                     HStack(spacing: 10) {
                         if let battery = status.battery {
-                            Label("\(battery)%", systemImage: status.isCharging ? "battery.100.bolt" : "battery.50")
+                            Label {
+                                Text(verbatim: "\(battery)%")
+                            } icon: {
+                                Image(systemName: status.isCharging ? "battery.100.bolt" : "battery.50")
+                            }
                         }
                         Label("\(status.viewers)台が視聴中", systemImage: "eye")
                     }
@@ -165,7 +169,7 @@ struct LiveView: View {
                     }
                 }
                 #if DEBUG
-                Text("受信: 映像 \(session.videoFrames) コマ / 音声 \(session.audioPackets) パケット")
+                Text(verbatim: "受信: 映像 \(session.videoFrames) コマ / 音声 \(session.audioPackets) パケット")
                     .font(.caption2)
                     .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.7))
@@ -214,7 +218,7 @@ struct LiveView: View {
                     session.isSpeakerMuted ? "speaker.slash.fill" : "speaker.wave.2.fill",
                     filled: session.isSpeakerMuted)
             }
-            .accessibilityLabel(session.isSpeakerMuted ? "音を出す" : "音を消す")
+            .accessibilityLabel(session.isSpeakerMuted ? "音を出す" as LocalizedStringKey : "音を消す")
 
             // 押しているあいだだけ話しかける
             VStack(spacing: 6) {
@@ -237,7 +241,7 @@ struct LiveView: View {
                     )
                     .accessibilityLabel("押しているあいだ話しかける")
                     .accessibilityAddTraits(.isButton)
-                Text(session.isTalking ? "話しています" : "押して話す")
+                Text(session.isTalking ? "話しています" as LocalizedStringKey : "押して話す")
                     .font(.caption)
             }
 
@@ -246,7 +250,7 @@ struct LiveView: View {
             } label: {
                 roundIcon("arrow.triangle.2.circlepath.camera.fill", filled: false)
             }
-            .accessibilityLabel(session.status?.usesFrontCamera == true ? "背面カメラに切り替える" : "前面カメラに切り替える")
+            .accessibilityLabel(session.status?.usesFrontCamera == true ? "背面カメラに切り替える" as LocalizedStringKey : "前面カメラに切り替える")
         }
         .foregroundStyle(.white)
         .padding(.bottom, 12)

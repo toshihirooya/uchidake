@@ -22,7 +22,10 @@
 		9F4936008AD4A86F521728F2 /* AudioPipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D5BC622370954A7238CFF1 /* AudioPipe.swift */; };
 		A74F550F416B7327B344D357 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B246059CA0951B09F8125BA3 /* HomeView.swift */; };
 		B28A4BCE3E3A4164EC85B1BD /* VideoLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E249BB5429BECCEFC87B68 /* VideoLayerView.swift */; };
+		CAC6227610293EDA9E6A0ADF /* Problem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F49E5CDB05A26905321A88 /* Problem.swift */; };
 		DBABC1C8ABC7AABEE36D7A21 /* ViewerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF36F9B742E3A1D2B617A3D2 /* ViewerViews.swift */; };
+		E2EB51F5174B6F87C8D1FBB6 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */; };
+		E6B49511A909A6CCCB26A872 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,12 +43,15 @@
 		06E249BB5429BECCEFC87B68 /* VideoLayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLayerView.swift; sourceTree = "<group>"; };
 		1D6F5B8C733560D808AC89B2 /* MediaPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacket.swift; sourceTree = "<group>"; };
 		1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UchidakeApp.swift; sourceTree = "<group>"; };
+		2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerSession.swift; sourceTree = "<group>"; };
 		30D5BC622370954A7238CFF1 /* AudioPipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPipe.swift; sourceTree = "<group>"; };
 		32BA8EEBBE6369BC050D2F22 /* PassphraseKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassphraseKey.swift; sourceTree = "<group>"; };
 		4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		51F49E5CDB05A26905321A88 /* Problem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Problem.swift; sourceTree = "<group>"; };
 		58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacketTests.swift; sourceTree = "<group>"; };
 		859E8D611D2E2E748F18B2B3 /* CameraStation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStation.swift; sourceTree = "<group>"; };
+		94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A269DFCEE68594D882CF5D37 /* VideoCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCodec.swift; sourceTree = "<group>"; };
 		A640931916AC7D858635765C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ADE1FDFF8D9966E4B54DCE48 /* UchidakeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = UchidakeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,6 +77,9 @@
 			children = (
 				4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */,
 				A640931916AC7D858635765C /* Info.plist */,
+				2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */,
+				94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */,
+				51F49E5CDB05A26905321A88 /* Problem.swift */,
 				1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */,
 				51AE45D9575C1415089E76B6 /* Camera */,
 				661CDA339576C1F28F1F33F0 /* Media */,
@@ -202,11 +211,12 @@
 			};
 			buildConfigurationList = EF14EE098C9D8F356B50EAA9 /* Build configuration list for PBXProject "Uchidake" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
 				en,
+				ja,
 			);
 			mainGroup = 7BFB5D3081069236E88D74A1;
 			minimizedProjectReferenceProxies = 1;
@@ -226,6 +236,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				36CF99F1CB71D4413081E8A3 /* Assets.xcassets in Resources */,
+				E2EB51F5174B6F87C8D1FBB6 /* InfoPlist.xcstrings in Resources */,
+				E6B49511A909A6CCCB26A872 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +264,7 @@
 				A74F550F416B7327B344D357 /* HomeView.swift in Sources */,
 				658D04A45DF787E1414EA37D /* MediaPacket.swift in Sources */,
 				25B49C2E36793C501EC8F513 /* PassphraseKey.swift in Sources */,
+				CAC6227610293EDA9E6A0ADF /* Problem.swift in Sources */,
 				4D19CD42C55859AAC6FD80A3 /* UchidakeApp.swift in Sources */,
 				97578CB530815D032E2B4272 /* VideoCodec.swift in Sources */,
 				B28A4BCE3E3A4164EC85B1BD /* VideoLayerView.swift in Sources */,

@@ -1,0 +1,508 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "%lld台が見ています（音も送っています）" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld device is watching (sound is on too)"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld devices are watching (sound is on too)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld台が視聴中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld watching"
+          }
+        }
+      }
+    },
+    "いまは誰も見ていません" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one is watching right now"
+          }
+        }
+      }
+    },
+    "この iPhone をカメラにする" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this iPhone as a camera"
+          }
+        }
+      }
+    },
+    "この合言葉にする" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this passphrase"
+          }
+        }
+      }
+    },
+    "つながりません。この端末の合言葉がカメラと同じか、カメラの端末でアプリが開いているかを確かめてください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't connect. Check that this device has the same passphrase as the camera, and that the app is open on the camera."
+          }
+        }
+      }
+    },
+    "やめる" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "カメラ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera"
+          }
+        }
+      }
+    },
+    "カメラにする iPhone でアプリを開き、「カメラを始める」を押してください。同じ Wi-Fi にいるか、近くにあれば見つかります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the app on the iPhone you want to use as a camera and tap “Start camera”. It will show up here if it's on the same Wi-Fi or nearby."
+          }
+        }
+      }
+    },
+    "カメラにする端末と、映像を見る端末のすべてに、同じ合言葉を入れてください。合言葉が同じ端末どうしだけがつながり、通信は暗号化されます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the same passphrase on every device: the camera and each device you watch from. Only devices with the same passphrase can connect, and everything they send is encrypted."
+          }
+        }
+      }
+    },
+    "カメラにつないでいます…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting to the camera…"
+          }
+        }
+      }
+    },
+    "カメラの使用が許可されていません。設定アプリで「%@」のカメラを許可してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera access is off. Allow the camera for “%@” in the Settings app."
+          }
+        }
+      }
+    },
+    "カメラの名前（例: リビング）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera name (e.g. Living room)"
+          }
+        }
+      }
+    },
+    "カメラの電池が少なくなっています" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The camera's battery is low"
+          }
+        }
+      }
+    },
+    "カメラを始める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start camera"
+          }
+        }
+      }
+    },
+    "カメラを探しています…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Looking for cameras…"
+          }
+        }
+      }
+    },
+    "カメラを探す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find cameras"
+          }
+        }
+      }
+    },
+    "カメラを止めますか？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop the camera?"
+          }
+        }
+      }
+    },
+    "カメラを止める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop camera"
+          }
+        }
+      }
+    },
+    "カメラを選ぶ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a camera"
+          }
+        }
+      }
+    },
+    "カメラ動作中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera is on"
+          }
+        }
+      }
+    },
+    "マイクが許可されていないので、話しかけられません。設定アプリで許可してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can't talk because microphone access is off. Turn it on in the Settings app."
+          }
+        }
+      }
+    },
+    "使っていない iPhone を、見守りたい場所に置きます。充電しながら、アプリを開いたままにしてください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place a spare iPhone where you want to keep watch. Keep it charging with the app open."
+          }
+        }
+      }
+    },
+    "充電しながら、この画面を開いたままにしてください。\nしばらくすると画面が暗くなります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep this iPhone charging with this screen open.\nThe screen will dim after a while."
+          }
+        }
+      }
+    },
+    "前面カメラに切り替える" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to front camera"
+          }
+        }
+      }
+    },
+    "合言葉を保存できませんでした。もう一度試してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the passphrase. Please try again."
+          }
+        }
+      }
+    },
+    "合言葉を変更" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change passphrase"
+          }
+        }
+      }
+    },
+    "合言葉を決める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a passphrase"
+          }
+        }
+      }
+    },
+    "合言葉（%lld文字以上）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passphrase (%lld+ characters)"
+          }
+        }
+      }
+    },
+    "変更すると、ほかの端末にも同じ合言葉を入れ直すまでつながらなくなります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After you change it, other devices can't connect until you enter the same passphrase on them."
+          }
+        }
+      }
+    },
+    "家の中で動いているカメラを探して、映像と音を確認します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find a camera running in your home, then watch and listen."
+          }
+        }
+      }
+    },
+    "待ち受けに失敗: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopped accepting viewers: %@"
+          }
+        }
+      }
+    },
+    "待ち受けを待機中: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting to accept viewers: %@"
+          }
+        }
+      }
+    },
+    "待ち受けを開始できません: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't accept viewers: %@"
+          }
+        }
+      }
+    },
+    "戻る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        }
+      }
+    },
+    "押しているあいだ話しかける" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold to talk"
+          }
+        }
+      }
+    },
+    "押して話す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold to talk"
+          }
+        }
+      }
+    },
+    "探索に失敗: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't look for cameras: %@"
+          }
+        }
+      }
+    },
+    "探索を待機中: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting to look for cameras: %@"
+          }
+        }
+      }
+    },
+    "映像は、家の中の端末どうしでだけやり取りします" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video stays between the devices in your home"
+          }
+        }
+      }
+    },
+    "映像を見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        }
+      }
+    },
+    "画面をタップすると戻ります" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the screen to wake it"
+          }
+        }
+      }
+    },
+    "背面カメラに切り替える" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to back camera"
+          }
+        }
+      }
+    },
+    "自動で作る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate one"
+          }
+        }
+      }
+    },
+    "見ている端末には映像が届かなくなります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devices that are watching will stop receiving video."
+          }
+        }
+      }
+    },
+    "話しています" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Talking"
+          }
+        }
+      }
+    },
+    "閉じる" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "音を出す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unmute"
+          }
+        }
+      }
+    },
+    "音を消す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mute"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
