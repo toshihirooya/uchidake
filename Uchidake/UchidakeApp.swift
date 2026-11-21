@@ -32,7 +32,8 @@ final class AppModel {
 
     private static let lastRoleKey = "lastRole"
     static let cameraNameKey = "cameraName"
-    static let defaultCameraName = "カメラ"
+    /// 名前を付けなかったときのカメラ名。Bonjour で相手に見える名前なので、付けた端末の言語で決まる。
+    static let defaultCameraName = String(localized: "カメラ")
 
     private(set) var mode: Mode = .home
     /// 端末どうしで共有する鍵。未設定なら nil。

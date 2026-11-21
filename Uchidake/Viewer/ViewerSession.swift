@@ -14,7 +14,7 @@ final class CameraFinder {
 
     private(set) var cameras: [FoundCamera] = []
     /// 探せないときの理由
-    private(set) var problem: String?
+    private(set) var problem: Problem?
 
     @ObservationIgnored private var browser: NWBrowser?
 
@@ -30,10 +30,10 @@ final class CameraFinder {
                 case .ready:
                     self.problem = nil
                 case .failed(let error):
-                    self.problem = "探索に失敗: \(error.localizedDescription)"
+                    self.problem = .browserFailed(error.localizedDescription)
                 case .waiting(let error):
                     // ローカルネットワークの許可が無いときなどはここに来る
-                    self.problem = "探索を待機中: \(error.localizedDescription)"
+                    self.problem = .browserWaiting(error.localizedDescription)
                 default:
                     break
                 }

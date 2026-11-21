@@ -10,7 +10,7 @@ final class CameraStation {
     private(set) var viewerCount = 0
     private(set) var usesFrontCamera = false
     /// カメラを使えない・待ち受けできないときの理由
-    private(set) var problem: String?
+    private(set) var problem: Problem?
 
     /// この端末で撮っている映像の表示先（置き場所を決めるための確認用）
     @ObservationIgnored let previewLayer = AVSampleBufferDisplayLayer()
@@ -28,7 +28,7 @@ final class CameraStation {
     func start() async {
         guard engine == nil else { return }
         guard await Self.requestAccess() else {
-            problem = "カメラの使用が許可されていません。設定アプリで「うちだけカメラ」のカメラを許可してください。"
+            problem = .cameraDenied
             return
         }
         guard engine == nil else { return }
@@ -40,7 +40,7 @@ final class CameraStation {
                     guard let self, self.engine === engine else { return }
                     #if DEBUG
                     if snapshot.viewerCount != self.viewerCount || snapshot.problem != self.problem {
-                        NSLog("[Uchidake] camera viewers=%d problem=%@", snapshot.viewerCount, snapshot.problem ?? "-")
+                        NSLog("[Uchidake] camera viewers=%d problem=%@", snapshot.viewerCount, snapshot.problem.map { String(describing: $0) } ?? "-")
                     }
                     #endif
                     self.viewerCount = snapshot.viewerCount

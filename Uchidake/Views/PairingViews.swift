@@ -109,11 +109,11 @@ struct SetupView: View {
 /// 番号つきの手順 1 行。
 struct GuideStep: View {
     let number: Int
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text("\(number)")
+            Text(verbatim: "\(number)")
                 .font(.footnote.bold().monospacedDigit())
                 .foregroundStyle(.black)
                 .frame(width: 22, height: 22)
@@ -139,7 +139,7 @@ struct PairingCodeView: View {
             Theme.background.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 16) {
-                    Text(isFirstDevice ? "2 台目を追加" : "端末を追加")
+                    Text(isFirstDevice ? "2 台目を追加" as LocalizedStringKey : "端末を追加")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                     if isFirstDevice {
                         Text("鍵を作りました。続けて、もう 1 台の端末をつなぎます。")
@@ -148,7 +148,7 @@ struct PairingCodeView: View {
                             .multilineTextAlignment(.center)
                     }
                     VStack(alignment: .leading, spacing: 10) {
-                        GuideStep(number: 1, text: "追加する端末で、うちだけカメラを開く")
+                        GuideStep(number: 1, text: "追加する端末で、\(AppInfo.displayName)を開く")
                         GuideStep(number: 2, text: "「QR コードを読み取る」を押す")
                         GuideStep(number: 3, text: "下の QR コードを写す")
                     }
@@ -176,7 +176,7 @@ struct PairingCodeView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Text(isFirstDevice ? "読み取りが済んだら、次へ" : "閉じる")
+                        Text(isFirstDevice ? "読み取りが済んだら、次へ" as LocalizedStringKey : "閉じる")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 6)
@@ -209,7 +209,7 @@ struct PairingScanView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @State private var access: Access = .asking
-    @State private var message: String?
+    @State private var message: LocalizedStringKey?
 
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
@@ -277,7 +277,7 @@ struct PairingScanView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
             case .denied:
                 VStack(spacing: 12) {
-                    Text("カメラを使う許可がありません。設定アプリで、うちだけカメラにカメラの使用を許可してください。")
+                    Text(Problem.cameraDenied.message)
                         .font(.footnote)
                         .multilineTextAlignment(.center)
                     Button("設定を開く") {
@@ -314,7 +314,7 @@ struct PairingScanView: View {
 
     private func handle(_ code: String) {
         guard PairingKey.key(fromCode: code) != nil else {
-            message = "うちだけカメラの QR コードではありません。"
+            message = "このアプリの QR コードではありません。"
             return
         }
         if model.adoptKey(fromCode: code) {

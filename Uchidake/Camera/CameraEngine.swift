@@ -13,7 +13,7 @@ final class CameraEngine {
         var viewerCount = 0
         var usesFrontCamera = false
         /// 待ち受けできないときの理由
-        var problem: String?
+        var problem: Problem?
     }
 
     static let maxViewers = 4
@@ -153,9 +153,9 @@ final class CameraEngine {
                     self.snapshot.problem = nil
                 case .waiting(let error):
                     // ローカルネットワークの許可が無いときなどはここに来る
-                    self.snapshot.problem = "待ち受けを待機中: \(error.localizedDescription)"
+                    self.snapshot.problem = .listenerWaiting(error.localizedDescription)
                 case .failed(let error):
-                    self.snapshot.problem = "待ち受けに失敗: \(error.localizedDescription)"
+                    self.snapshot.problem = .listenerFailed(error.localizedDescription)
                     self.listener?.cancel()
                     self.listener = nil
                     // 少し待ってやり直す
@@ -178,7 +178,7 @@ final class CameraEngine {
             listener.start(queue: queue)
             self.listener = listener
         } catch {
-            snapshot.problem = "待ち受けを開始できません: \(error.localizedDescription)"
+            snapshot.problem = .listenerUnavailable(error.localizedDescription)
             publish()
         }
     }

@@ -16,7 +16,7 @@ struct HomeView: View {
                         Image(systemName: "house.fill")
                             .font(.system(size: 40))
                             .foregroundStyle(Theme.accent)
-                        Text("うちだけカメラ")
+                        Text(verbatim: AppInfo.displayName)
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                         Text("映像は、家の中の端末どうしでだけやり取りします")
                             .font(.footnote)

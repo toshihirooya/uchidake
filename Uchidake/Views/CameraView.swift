@@ -69,8 +69,14 @@ struct CameraView: View {
                 Text("カメラ動作中")
                     .font(.headline)
             }
-            Text(station.viewerCount > 0 ? "\(station.viewerCount)台が見ています（音も送っています）" : "いまは誰も見ていません")
-                .font(.subheadline)
+            Group {
+                if station.viewerCount > 0 {
+                    Text("\(station.viewerCount)台が見ています（音も送っています）")
+                } else {
+                    Text("いまは誰も見ていません")
+                }
+            }
+            .font(.subheadline)
         }
         .accessibilityElement(children: .combine)
     }
@@ -89,7 +95,7 @@ struct CameraView: View {
             .padding(.top, 12)
 
             if let problem = station.problem {
-                Text(problem)
+                Text(problem.message)
                     .font(.callout)
                     .foregroundStyle(Theme.warning)
                     .multilineTextAlignment(.center)
@@ -115,7 +121,7 @@ struct CameraView: View {
                 } label: {
                     roundButton(systemImage: "arrow.triangle.2.circlepath.camera.fill", color: .white.opacity(0.25))
                 }
-                .accessibilityLabel(station.usesFrontCamera ? "背面カメラに切り替える" : "前面カメラに切り替える")
+                .accessibilityLabel(station.usesFrontCamera ? "背面カメラに切り替える" as LocalizedStringKey : "前面カメラに切り替える")
 
                 Button {
                     lastTouch = Date()

@@ -57,3 +57,18 @@ xcrun simctl launch --console <見る役の UDID> com.example.Uchidake -autoKey 
 ```
 
 `--console` を付けると、つながったことと受信したコマ数が `[Uchidake]` で始まる行に出る。シミュレータにはカメラもマイクも無いので、テスト画像と確認音のデータが流れる。
+
+## 言語
+
+画面の文言は日本語で書き、ほかの言語は String Catalog に訳を足す。いまは日本語と英語。
+
+| ファイル | 中身 |
+|---|---|
+| `Uchidake/Localizable.xcstrings` | 画面の文言。キーはコード中の日本語そのもの。 |
+| `Uchidake/InfoPlist.xcstrings` | アプリ名と、カメラ・マイク・ローカルネットワークの許可ダイアログの文言。 |
+
+- 文言を足すときは、コードに日本語で書き、`Localizable.xcstrings` に訳を足す（Xcode で開くと、足りないキーが分かる）。
+- 画面より下の層では文言を作らない。理由は `Problem` のような型で持ち、画面に出す直前に文言にする。
+- 言語を増やすときは、2 つの `.xcstrings` にその言語の訳を足す。コードの変更は要らない。
+
+英語で表示を確かめるには、起動オプションに `-AppleLanguages "(en)"` を付ける。
