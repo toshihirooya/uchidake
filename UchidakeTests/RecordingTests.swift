@@ -555,3 +555,124 @@ final class ViewerEngineRecordingTests: XCTestCase {
         XCTAssertTrue(((try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []).isEmpty)
     }
 }
+
+// MARK: - 見る側のセッション
+
+/// 確保した時間の偽物。確保と返却を順に記録し、返却の重なりや確保していない返却を見つける。
+@MainActor
+private final class FakeBackgroundTime {
+    private(set) var events: [String] = []
+    private var held: [String: Int] = [:]
+
+    var backgroundTime: BackgroundTime {
+        BackgroundTime { [self] name in
+            events.append("begin \(name)")
+            held[name, default: 0] += 1
+            var ended = false
+            return { [self] in
+                XCTAssertFalse(ended, "\(name) を 2 回返した")
+                ended = true
+                XCTAssertGreaterThan(held[name, default: 0], 0, "確保していない \(name) を返した")
+                held[name, default: 0] -= 1
+                events.append("end \(name)")
+            }
+        }
+    }
+
+    func events(named name: String) -> [String] {
+        events.filter { $0.hasSuffix(" \(name)") }
+    }
+}
+
+@MainActor
+final class ViewerSessionRecordingTests: XCTestCase {
+    private var directory: URL!
+    private var nextFrameID: UInt32 = 0
+
+    override func setUpWithError() throws {
+        directory = FileManager.default.temporaryDirectory.appendingPathComponent("ViewerSessionRecordingTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        try? FileManager.default.removeItem(at: directory)
+    }
+
+    /// つながらない宛先で作り、start() しない。「写真」は偽物
+    private func makeSession(_ time: FakeBackgroundTime) -> ViewerSession {
+        ViewerSession(
+            camera: CameraFinder.FoundCamera(name: "テスト", endpoint: .hostPort(host: "127.0.0.1", port: 9)),
+            key: Data(count: 32),
+            saver: MediaSaver(library: FakeLibrary(), directory: directory),
+            backgroundTime: time.backgroundTime)
+    }
+
+    private func feed(_ frames: [Data], to session: ViewerSession) {
+        for frame in frames {
+            for data in MediaPacket.videoPackets(frame: frame, frameID: nextFrameID) {
+                session.receiveForTesting(MediaPacket(data)!)
+            }
+            nextFrameID += 1
+        }
+    }
+
+    /// 条件が成り立つまで、メインの処理を進めながら待つ
+    private func waitUntil(_ description: String, _ condition: () -> Bool) async throws {
+        for _ in 0..<1000 {
+            if condition() { return }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        XCTFail("待ちきれなかった: \(description)")
+    }
+
+    /// つないで録画を始め、キーフレームから 30 コマ流す
+    private func startRecording(_ session: ViewerSession) async throws {
+        let warmUp = makeFrames(count: 3), recorded = makeFrames(count: 30)
+        feed(warmUp, to: session)
+        try await waitUntil("つながった") { session.isLive }
+        await session.toggleRecording()
+        XCTAssertTrue(session.isRecording)
+        feed(recorded, to: session)
+    }
+
+    func testStoppingHoldsBackgroundTimeUntilTheFileIsClosed() async throws {
+        let time = FakeBackgroundTime()
+        let session = makeSession(time)
+        try await startRecording(session)
+        XCTAssertTrue(time.events.isEmpty)
+
+        session.stopRecording()
+        session.stopRecording()  // 2 度押しでも重ねて確保しない
+        XCTAssertEqual(time.events, ["begin FinishRecording"])
+
+        try await waitUntil("録画が止まった") { !session.isRecording }
+        XCTAssertEqual(time.events(named: "FinishRecording"), ["begin FinishRecording", "end FinishRecording"])
+        // できたファイルの保存は、閉じ終える時間を返す前に自分の時間を確保している（すき間が無い）
+        let saveBegin = try XCTUnwrap(time.events.firstIndex(of: "begin SaveVideo"))
+        XCTAssertLessThan(saveBegin, try XCTUnwrap(time.events.firstIndex(of: "end FinishRecording")))
+        try await waitUntil("保存の時間を返した") { time.events.contains("end SaveVideo") }
+    }
+
+    // 画面を閉じてすぐバックグラウンドに回ることがある。セッションが消えても、閉じ終えたら返す
+    func testClosingTheScreenHoldsBackgroundTimeEvenAfterTheSessionIsGone() async throws {
+        let time = FakeBackgroundTime()
+        var session: ViewerSession? = makeSession(time)
+        try await startRecording(session!)
+        session!.stop()
+        session = nil
+        XCTAssertEqual(time.events, ["begin FinishRecording"])
+
+        try await waitUntil("閉じ終えて時間を返した") { time.events.contains("end FinishRecording") }
+        XCTAssertEqual(time.events(named: "FinishRecording"), ["begin FinishRecording", "end FinishRecording"])
+        XCTAssertTrue(time.events.contains("begin SaveVideo"))
+    }
+
+    // 録画していなければ、止めても時間を確保しない
+    func testStoppingWhenNotRecordingHoldsNothing() {
+        let time = FakeBackgroundTime()
+        let session = makeSession(time)
+        session.stopRecording()
+        session.stop()
+        XCTAssertTrue(time.events.isEmpty)
+    }
+}

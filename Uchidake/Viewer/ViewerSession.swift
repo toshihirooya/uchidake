@@ -95,9 +95,13 @@ final class ViewerSession: Identifiable {
     @ObservationIgnored private let saver: MediaSaver
     /// 録画を始める途中（許可を待っている）。2 度押しで 2 つ始めないための印
     @ObservationIgnored private var isStartingRecording = false
+    @ObservationIgnored private let backgroundTime: BackgroundTime
+    /// 録画を止めてから、ファイルを閉じ終える（onStop）までに確保した時間
+    @ObservationIgnored private let finishingTime = HeldTime()
 
-    init(camera: CameraFinder.FoundCamera, key: Data, saver: MediaSaver) {
+    init(camera: CameraFinder.FoundCamera, key: Data, saver: MediaSaver, backgroundTime: BackgroundTime = .system) {
         self.saver = saver
+        self.backgroundTime = backgroundTime
         cameraName = camera.name
         layer.videoGravity = .resizeAspect
         engine = ViewerEngine(endpoint: camera.endpoint, key: key, layer: layer)
@@ -192,10 +196,10 @@ final class ViewerSession: Identifiable {
         // 許可を待っているあいだに、画面が閉じられた・つながりが切れたことがある
         guard !isClosed, isLive else { return }
 
-        let saver = saver
+        let saver = saver, backgroundTime = backgroundTime, finishingTime = finishingTime
         engine.startRecording(directory: saver.directory, onFile: { url in
             DispatchQueue.main.async {
-                MainActor.assumeIsolated { Self.saveInBackground(url, saver: saver) }
+                MainActor.assumeIsolated { Self.saveInBackground(url, saver: saver, backgroundTime: backgroundTime) }
             }
         }, onStop: { [weak self] lowStorage in
             DispatchQueue.main.async {
@@ -203,6 +207,9 @@ final class ViewerSession: Identifiable {
                     if lowStorage { saver.report(.lowStorage) }
                     self?.isRecording = false
                     self?.recordingStartedAt = nil
+                    // 閉じ終えた。できたファイルは onFile がそれぞれ時間を確保している（onFile は onStop より先に来る）。
+                    // セッションが先に消えても返せるよう、self を通さずに返す
+                    finishingTime.end()
                 }
             }
         })
@@ -211,24 +218,62 @@ final class ViewerSession: Identifiable {
     }
 
     /// 録画中なら止める。画面を閉じるとき、バックグラウンドに回るときに呼ぶ。
+    /// ファイルを閉じ終えるまでの時間を確保する（バックグラウンドに回っても閉じ終えられるように）。返すのは onStop。
     func stopRecording() {
         guard isRecording else { return }
+        finishingTime.hold(backgroundTime, name: "FinishRecording")
         engine.stopRecording()
     }
 
     /// 書き終えた動画を「写真」に入れる。`saver` を強く持つので、セッションが消えても続く。
     /// バックグラウンドに回っても終えられるよう、時間を確保する。
-    private static func saveInBackground(_ url: URL, saver: MediaSaver) {
-        let task = BackgroundTask()
+    private static func saveInBackground(_ url: URL, saver: MediaSaver, backgroundTime: BackgroundTime) {
+        let end = backgroundTime.begin("SaveVideo")
         Task {
             await saver.saveVideo(at: url)
-            task.end()
+            end()
         }
     }
+
+    #if DEBUG
+    /// テスト用: 受信したことにしてエンジンに流す。
+    func receiveForTesting(_ packet: MediaPacket) {
+        engine.receiveForTesting(packet)
+    }
+    #endif
 
     /// 画面が見えていないあいだは、映像の表示を止める（音は聞き続ける）。
     func setVideoPaused(_ paused: Bool) {
         engine.setVideoPaused(paused)
+    }
+}
+
+/// バックグラウンドに回っても処理を続けるための時間。テストでは偽物に差し替える。
+struct BackgroundTime {
+    /// 時間を確保する。返した関数を呼ぶと返す。
+    var begin: @MainActor (_ name: String) -> @MainActor () -> Void
+
+    /// `UIApplication.beginBackgroundTask` を使う本物
+    static let system = BackgroundTime { name in
+        let task = BackgroundTask(name: name)
+        return { task.end() }
+    }
+}
+
+/// 確保した時間を 1 つまで持つ。持っているあいだは重ねて確保しない。`end()` は持っているときだけ返す。
+@MainActor
+private final class HeldTime {
+    private var release: (@MainActor () -> Void)?
+
+    func hold(_ backgroundTime: BackgroundTime, name: String) {
+        guard release == nil else { return }
+        release = backgroundTime.begin(name)
+    }
+
+    func end() {
+        let release = self.release
+        self.release = nil
+        release?()
     }
 }
 
@@ -237,8 +282,8 @@ final class ViewerSession: Identifiable {
 private final class BackgroundTask {
     private var identifier = UIBackgroundTaskIdentifier.invalid
 
-    init() {
-        identifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideo") { [weak self] in
+    init(name: String) {
+        identifier = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
             MainActor.assumeIsolated { self?.end() }
         }
     }
