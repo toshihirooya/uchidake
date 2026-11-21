@@ -410,13 +410,15 @@ struct SaveNoticeView: View {
         case .videoFailed: "保存できませんでした。次にアプリを開いたとき、もう一度試します。"
         case .permissionDenied: "「写真」への追加が許可されていません。設定アプリで許可してください。"
         case .lowStorage: "空き容量が少ないので、録画できません。"
+        case .recordingLost: "録画を保存できませんでした。"
+        case .stoppedForStorage: "空き容量が少なくなったので、録画を止めて保存しました。"
         }
     }
 
     private static func isProblem(_ notice: MediaSaver.Notice) -> Bool {
         switch notice {
         case .photoSaved, .videoSaved: false
-        case .photoFailed, .videoFailed, .permissionDenied, .lowStorage: true
+        case .photoFailed, .videoFailed, .permissionDenied, .lowStorage, .recordingLost, .stoppedForStorage: true
         }
     }
 }

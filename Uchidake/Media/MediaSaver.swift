@@ -54,6 +54,10 @@ struct SystemPhotoLibrary: PhotoLibrary {
 final class MediaSaver {
     enum Notice: Equatable {
         case photoSaved, videoSaved, photoFailed, videoFailed, permissionDenied, lowStorage
+        /// 録画を止めたが、ファイルが 1 つもできなかった（書き込みの失敗・閉じられなかった・キーフレームの前に止めた）
+        case recordingLost
+        /// 録画中に空き容量が少なくなったので、止めて保存した
+        case stoppedForStorage
     }
 
     /// 録画を始める・続けるのに必要な空き容量
@@ -154,7 +158,7 @@ final class MediaSaver {
         }
     }
 
-    /// エンジン側で起きたこと（容量が減って止めた、写真を復元できなかった）を知らせとして出す。
+    /// エンジン側で起きたこと（容量が減って止めた、録画が残らなかった、写真を復元できなかった）を知らせとして出す。
     func report(_ notice: Notice) {
         #if DEBUG
         // 検証用: 画面を見なくても保存の結果が分かるようにする
@@ -165,6 +169,8 @@ final class MediaSaver {
         case .videoFailed: NSLog("[Uchidake] save failed video")
         case .permissionDenied: NSLog("[Uchidake] save failed permission")
         case .lowStorage: NSLog("[Uchidake] save notice lowStorage")
+        case .recordingLost: NSLog("[Uchidake] save failed recording")
+        case .stoppedForStorage: NSLog("[Uchidake] save notice stoppedForStorage")
         }
         #endif
         self.notice = notice

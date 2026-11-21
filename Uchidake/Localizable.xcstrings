@@ -713,6 +713,16 @@
         }
       }
     },
+    "空き容量が少なくなったので、録画を止めて保存しました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free space is low, so the recording was stopped and saved."
+          }
+        }
+      }
+    },
     "端末をつなぐ準備" : {
       "localizations" : {
         "en" : {
@@ -839,6 +849,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open %@ on the device you are adding"
+          }
+        }
+      }
+    },
+    "録画を保存できませんでした。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the recording."
           }
         }
       }

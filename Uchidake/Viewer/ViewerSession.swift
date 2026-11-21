@@ -197,14 +197,19 @@ final class ViewerSession: Identifiable {
         guard !isClosed, isLive else { return }
 
         let saver = saver, backgroundTime = backgroundTime, finishingTime = finishingTime
+        // この録画でできたファイルの数。onFile も onStop もメインに戻してから数える（onFile が先に来る）
+        let files = FileCount()
         engine.startRecording(directory: saver.directory, onFile: { url in
             DispatchQueue.main.async {
-                MainActor.assumeIsolated { Self.saveInBackground(url, saver: saver, backgroundTime: backgroundTime) }
+                MainActor.assumeIsolated {
+                    files.value += 1
+                    Self.saveInBackground(url, saver: saver, backgroundTime: backgroundTime)
+                }
             }
         }, onStop: { [weak self] lowStorage in
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
-                    if lowStorage { saver.report(.lowStorage) }
+                    if let notice = Self.stopNotice(files: files.value, lowStorage: lowStorage) { saver.report(notice) }
                     #if DEBUG
                     if self?.isRecording == true { NSLog("[Uchidake] viewer recording=0") }
                     #endif
@@ -221,6 +226,14 @@ final class ViewerSession: Identifiable {
         #if DEBUG
         NSLog("[Uchidake] viewer recording=1")
         #endif
+    }
+
+    /// 録画が止まったときに出す知らせ。ファイルが 1 つもできなかったら、それを何より先に知らせる
+    /// （赤い印が消えるだけで、何も残らないことに気づけないため）。
+    /// ファイルができていれば、保存の結果は `saveVideo` が知らせる。
+    static func stopNotice(files: Int, lowStorage: Bool) -> MediaSaver.Notice? {
+        if files == 0 { return .recordingLost }
+        return lowStorage ? .stoppedForStorage : nil
     }
 
     /// 録画中なら止める。画面を閉じるとき、バックグラウンドに回るときに呼ぶ。
@@ -264,6 +277,12 @@ struct BackgroundTime {
         let task = BackgroundTask(name: name)
         return { task.end() }
     }
+}
+
+/// 1 回の録画でできたファイルの数
+@MainActor
+private final class FileCount {
+    var value = 0
 }
 
 /// 確保した時間を 1 つまで持つ。持っているあいだは重ねて確保しない。`end()` は持っているときだけ返す。

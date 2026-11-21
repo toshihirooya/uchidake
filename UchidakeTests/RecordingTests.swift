@@ -641,11 +641,11 @@ final class ViewerSessionRecordingTests: XCTestCase {
     }
 
     /// つながらない宛先で作り、start() しない。「写真」は偽物
-    private func makeSession(_ time: FakeBackgroundTime) -> ViewerSession {
+    private func makeSession(_ time: FakeBackgroundTime, saver: MediaSaver? = nil) -> ViewerSession {
         ViewerSession(
             camera: CameraFinder.FoundCamera(name: "テスト", endpoint: .hostPort(host: "127.0.0.1", port: 9)),
             key: Data(count: 32),
-            saver: MediaSaver(library: FakeLibrary(), directory: directory),
+            saver: saver ?? MediaSaver(library: FakeLibrary(), directory: directory),
             backgroundTime: time.backgroundTime)
     }
 
@@ -707,6 +707,41 @@ final class ViewerSessionRecordingTests: XCTestCase {
         try await waitUntil("閉じ終えて時間を返した") { time.events.contains("end FinishRecording") }
         XCTAssertEqual(time.events(named: "FinishRecording"), ["begin FinishRecording", "end FinishRecording"])
         XCTAssertTrue(time.events.contains("begin SaveVideo"))
+    }
+
+    // キーフレームの前に止めるなど、ファイルが 1 つもできなかったら、そう知らせる
+    func testRecordingWithNoFileReportsRecordingLost() async throws {
+        let saver = MediaSaver(library: FakeLibrary(), directory: directory)
+        let session = makeSession(FakeBackgroundTime(), saver: saver)
+        feed(makeFrames(count: 3), to: session)
+        try await waitUntil("つながった") { session.isLive }
+        await session.toggleRecording()
+        XCTAssertTrue(session.isRecording)
+        session.stopRecording()
+        try await waitUntil("録画が止まった") { !session.isRecording }
+        XCTAssertEqual(saver.notice, .recordingLost)
+    }
+
+    // ファイルができていれば「録画を保存できませんでした」は出さず、保存の結果を出す
+    func testRecordingWithAFileDoesNotReportRecordingLost() async throws {
+        let time = FakeBackgroundTime()
+        let saver = MediaSaver(library: FakeLibrary(), directory: directory)
+        let session = makeSession(time, saver: saver)
+        try await startRecording(session)
+        session.stopRecording()
+        try await waitUntil("録画が止まった") { !session.isRecording }
+        XCTAssertNotEqual(saver.notice, .recordingLost)
+        try await waitUntil("保存の時間を返した") { time.events.contains("end SaveVideo") }
+        XCTAssertEqual(saver.notice, .videoSaved)
+    }
+
+    // 止まったときの知らせ: ファイルが無いことが、空き容量で止めたことより先
+    func testStopNoticePrefersRecordingLostOverStoppedForStorage() {
+        XCTAssertEqual(ViewerSession.stopNotice(files: 0, lowStorage: false), .recordingLost)
+        XCTAssertEqual(ViewerSession.stopNotice(files: 0, lowStorage: true), .recordingLost)
+        XCTAssertEqual(ViewerSession.stopNotice(files: 1, lowStorage: true), .stoppedForStorage)
+        XCTAssertEqual(ViewerSession.stopNotice(files: 2, lowStorage: true), .stoppedForStorage)
+        XCTAssertNil(ViewerSession.stopNotice(files: 1, lowStorage: false))
     }
 
     // 録画していなければ、止めても時間を確保しない
