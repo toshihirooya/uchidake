@@ -156,6 +156,17 @@ final class MediaSaver {
 
     /// エンジン側で起きたこと（容量が減って止めた、写真を復元できなかった）を知らせとして出す。
     func report(_ notice: Notice) {
+        #if DEBUG
+        // 検証用: 画面を見なくても保存の結果が分かるようにする
+        switch notice {
+        case .photoSaved: NSLog("[Uchidake] saved photo")
+        case .videoSaved: NSLog("[Uchidake] saved video")
+        case .photoFailed: NSLog("[Uchidake] save failed photo")
+        case .videoFailed: NSLog("[Uchidake] save failed video")
+        case .permissionDenied: NSLog("[Uchidake] save failed permission")
+        case .lowStorage: NSLog("[Uchidake] save notice lowStorage")
+        }
+        #endif
         self.notice = notice
         noticeTask?.cancel()
         noticeTask = Task { [weak self] in

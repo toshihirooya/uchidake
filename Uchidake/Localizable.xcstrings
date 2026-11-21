@@ -113,12 +113,12 @@
         }
       }
     },
-    "見ている端末が録画しています" : {
+    "「写真」への追加が許可されていません。設定アプリで許可してください。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A viewer is recording"
+            "value" : "Adding to Photos isn't allowed. Allow it in the Settings app."
           }
         }
       }
@@ -219,6 +219,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Can't connect. Check that this device was set up with the same QR code as the camera, and that the app is open on the camera."
+          }
+        }
+      }
+    },
+    "ほかの端末が録画中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another device is recording"
           }
         }
       }
@@ -453,6 +463,16 @@
         }
       }
     },
+    "保存できませんでした。次にアプリを開いたとき、もう一度試します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save. We'll try again the next time you open the app."
+          }
+        }
+      }
+    },
     "充電しながら、この画面を開いたままにしてください。\nしばらくすると画面が暗くなります。" : {
       "localizations" : {
         "en" : {
@@ -463,12 +483,62 @@
         }
       }
     },
+    "写真を保存しました" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo saved"
+          }
+        }
+      }
+    },
+    "写真を保存できませんでした。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the photo."
+          }
+        }
+      }
+    },
+    "写真を撮る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take photo"
+          }
+        }
+      }
+    },
     "前面カメラに切り替える" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to front camera"
+          }
+        }
+      }
+    },
+    "動画を保存しています…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving video…"
+          }
+        }
+      }
+    },
+    "動画を保存しました" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video saved"
           }
         }
       }
@@ -633,6 +703,16 @@
         }
       }
     },
+    "空き容量が少ないので、録画できません。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough free space to record."
+          }
+        }
+      }
+    },
     "端末をつなぐ準備" : {
       "localizations" : {
         "en" : {
@@ -669,6 +749,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to back camera"
+          }
+        }
+      }
+    },
+    "見ている端末が録画しています" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A viewer is recording"
           }
         }
       }
@@ -749,6 +839,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open %@ on the device you are adding"
+          }
+        }
+      }
+    },
+    "録画を始める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start recording"
+          }
+        }
+      }
+    },
+    "録画を止める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop recording"
           }
         }
       }

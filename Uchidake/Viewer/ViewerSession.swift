@@ -205,6 +205,9 @@ final class ViewerSession: Identifiable {
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
                     if lowStorage { saver.report(.lowStorage) }
+                    #if DEBUG
+                    if self?.isRecording == true { NSLog("[Uchidake] viewer recording=0") }
+                    #endif
                     self?.isRecording = false
                     self?.recordingStartedAt = nil
                     // 閉じ終えた。できたファイルは onFile がそれぞれ時間を確保している（onFile は onStop より先に来る）。
@@ -215,6 +218,9 @@ final class ViewerSession: Identifiable {
         })
         isRecording = true
         recordingStartedAt = Date()
+        #if DEBUG
+        NSLog("[Uchidake] viewer recording=1")
+        #endif
     }
 
     /// 録画中なら止める。画面を閉じるとき、バックグラウンドに回るときに呼ぶ。

@@ -44,6 +44,10 @@ final class AppModel {
     private(set) var key: Data? = PairingKey.load()
     /// 検証用: 見る側で、最初に見つかったカメラを自動で開く
     private(set) var opensFirstCamera = false
+    /// 検証用: 最初に開いたカメラで、写真を 1 枚撮る
+    private(set) var autoPhoto = false
+    /// 検証用: 最初に開いたカメラで、この秒数だけ録画する
+    private(set) var autoRecordSeconds: Double?
 
     @ObservationIgnored private var didResume = false
 
@@ -135,6 +139,10 @@ final class AppModel {
         let defaults = UserDefaults.standard
         let autoKey = defaults.string(forKey: "autoKey").flatMap(PairingKey.key(base64URL:))
         let role = defaults.string(forKey: "autoRole")
+        autoPhoto = defaults.bool(forKey: "autoPhoto")
+        if let seconds = defaults.string(forKey: "autoRecord").flatMap(Double.init), seconds > 0 {
+            autoRecordSeconds = seconds
+        }
         guard autoKey != nil || role != nil else { return }
         didResume = true
         Task {
@@ -151,6 +159,15 @@ final class AppModel {
                 break
             }
         }
+    }
+
+    /// `-autoPhoto` と `-autoRecord` を 1 回だけ渡す（2 台目以降に開いたカメラでは何もしない）。
+    func takeDebugCaptureOptions() -> (photo: Bool, recordSeconds: Double?) {
+        defer {
+            autoPhoto = false
+            autoRecordSeconds = nil
+        }
+        return (autoPhoto, autoRecordSeconds)
     }
     #endif
 }
