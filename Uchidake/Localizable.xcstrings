@@ -113,6 +113,16 @@
         }
       }
     },
+    "見ている端末が録画しています" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A viewer is recording"
+          }
+        }
+      }
+    },
     "いまは誰も見ていません" : {
       "localizations" : {
         "en" : {

@@ -27,6 +27,7 @@
 		DBABC1C8ABC7AABEE36D7A21 /* ViewerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF36F9B742E3A1D2B617A3D2 /* ViewerViews.swift */; };
 		E2EB51F5174B6F87C8D1FBB6 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */; };
 		E6B49511A909A6CCCB26A872 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */; };
+		F5C9C5B302F81EDF122B3DD2 /* RecordingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBEA158DCF8D70F9B0B2D3D /* RecordingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		1D6F5B8C733560D808AC89B2 /* MediaPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacket.swift; sourceTree = "<group>"; };
 		1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UchidakeApp.swift; sourceTree = "<group>"; };
 		2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		2FBEA158DCF8D70F9B0B2D3D /* RecordingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingTests.swift; sourceTree = "<group>"; };
 		30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerSession.swift; sourceTree = "<group>"; };
 		30D5BC622370954A7238CFF1 /* AudioPipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPipe.swift; sourceTree = "<group>"; };
 		4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */,
+				2FBEA158DCF8D70F9B0B2D3D /* RecordingTests.swift */,
 			);
 			path = UchidakeTests;
 			sourceTree = "<group>";
@@ -252,6 +255,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				45BB58B07B6E896892BBF0AE /* MediaPacketTests.swift in Sources */,
+				F5C9C5B302F81EDF122B3DD2 /* RecordingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

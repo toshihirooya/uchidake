@@ -8,6 +8,8 @@ import UIKit
 final class CameraStation {
     let name: String
     private(set) var viewerCount = 0
+    /// 録画している見る側の数
+    private(set) var recorderCount = 0
     private(set) var usesFrontCamera = false
     /// カメラを使えない・待ち受けできないときの理由
     private(set) var problem: Problem?
@@ -39,11 +41,12 @@ final class CameraStation {
                 MainActor.assumeIsolated {
                     guard let self, self.engine === engine else { return }
                     #if DEBUG
-                    if snapshot.viewerCount != self.viewerCount || snapshot.problem != self.problem {
-                        NSLog("[Uchidake] camera viewers=%d problem=%@", snapshot.viewerCount, snapshot.problem.map { String(describing: $0) } ?? "-")
+                    if snapshot.viewerCount != self.viewerCount || snapshot.recorderCount != self.recorderCount || snapshot.problem != self.problem {
+                        NSLog("[Uchidake] camera viewers=%d recorders=%d problem=%@", snapshot.viewerCount, snapshot.recorderCount, snapshot.problem.map { String(describing: $0) } ?? "-")
                     }
                     #endif
                     self.viewerCount = snapshot.viewerCount
+                    self.recorderCount = snapshot.recorderCount
                     self.usesFrontCamera = snapshot.usesFrontCamera
                     self.problem = snapshot.problem
                 }
@@ -68,6 +71,7 @@ final class CameraStation {
         engine?.stop()
         engine = nil
         viewerCount = 0
+        recorderCount = 0
         previewLayer.sampleBufferRenderer.flush(removingDisplayedImage: true)
     }
 
