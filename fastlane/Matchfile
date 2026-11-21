@@ -1,0 +1,11 @@
+# 証明書とプロファイルの置き場所。Clipan・sakecal と同じチームなので、同じ証明書リポジトリを共有する。
+# ローカルは SSH、CI を作るときは MATCH_GIT_URL（HTTPS）で上書きする
+git_url(ENV["MATCH_GIT_URL"] || "git@github.com:toshihirooya/clipan-certificates.git")
+
+storage_mode("git")
+
+app_identifier(["com.toshihirooya.uchidake"])
+team_id("PU7N6T2J8N")
+
+# 既定は readonly（取ってくるだけ）。作成・更新するときだけ Fastfile の lane に readonly:false を渡す
+readonly(true)
