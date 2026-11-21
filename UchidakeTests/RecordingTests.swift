@@ -469,6 +469,16 @@ final class MediaSaverTests: XCTestCase {
         XCTAssertNotNil(MediaSaver.freeBytes(at: directory))
         XCTAssertTrue(MediaSaver(library: FakeLibrary(), directory: directory).ensureStorage())
     }
+
+    // 空きが 200MB より少なければ録画を始めず、そう知らせる
+    func testLowFreeSpaceRefusesToStartRecording() {
+        let low = MediaSaver(library: FakeLibrary(), directory: directory, freeBytes: { _ in 199_999_999 })
+        XCTAssertFalse(low.ensureStorage())
+        XCTAssertEqual(low.notice, .lowStorage)
+        let enough = MediaSaver(library: FakeLibrary(), directory: directory, freeBytes: { _ in 200_000_000 })
+        XCTAssertTrue(enough.ensureStorage())
+        XCTAssertNil(enough.notice)
+    }
 }
 
 // MARK: - 見る側のエンジン
@@ -579,6 +589,46 @@ final class ViewerEngineRecordingTests: XCTestCase {
         wait(for: [extra], timeout: 1)
         let files = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
         XCTAssertEqual(files.count, 1)
+    }
+
+    // 録画中に空きが 200MB を下回ったら、自分で止めて、そこまでを保存する
+    func testLowFreeSpaceDuringRecordingStopsAndKeepsTheFile() {
+        engine = ViewerEngine(endpoint: .hostPort(host: "127.0.0.1", port: 9), key: Data(count: 32),
+                              layer: AVSampleBufferDisplayLayer(), freeBytes: { _ in 199_999_999 })
+        var files: [URL] = []
+        let fileFinished = expectation(description: "onFile")
+        fileFinished.assertForOverFulfill = true
+        let stopped = expectation(description: "onStop")
+        stopped.assertForOverFulfill = true
+        engine.startRecording(directory: directory, onFile: { url in
+            files.append(url)
+            fileFinished.fulfill()
+        }, onStop: { lowStorage in
+            XCTAssertTrue(lowStorage)
+            stopped.fulfill()
+        })
+        feed(makeFrames(count: 30))
+        engine.tickForTesting()
+        wait(for: [fileFinished, stopped], timeout: 10, enforceOrder: true)
+        XCTAssertEqual(files.count, 1)
+        XCTAssertTrue(files.allSatisfy { FileManager.default.fileExists(atPath: $0.path) })
+    }
+
+    // 空きが足りていれば、見張りで止めない
+    func testEnoughFreeSpaceKeepsRecording() {
+        engine = ViewerEngine(endpoint: .hostPort(host: "127.0.0.1", port: 9), key: Data(count: 32),
+                              layer: AVSampleBufferDisplayLayer(), freeBytes: { _ in 200_000_000 })
+        let stopped = expectation(description: "onStop")
+        stopped.assertForOverFulfill = true
+        engine.startRecording(directory: directory, onFile: { _ in }, onStop: { lowStorage in
+            // 見張りで止めていれば true になる。止めたのは下の stopRecording
+            XCTAssertFalse(lowStorage)
+            stopped.fulfill()
+        })
+        feed(makeFrames(count: 30))
+        engine.tickForTesting()
+        engine.stopRecording()
+        wait(for: [stopped], timeout: 10)
     }
 
     // Review Focus 2

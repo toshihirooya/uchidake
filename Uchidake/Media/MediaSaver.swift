@@ -84,13 +84,17 @@ final class MediaSaver {
     private(set) var pendingVideos = 0
 
     @ObservationIgnored private let library: PhotoLibrary
+    /// 空きを調べる（テストでは差し替える）
+    @ObservationIgnored private let freeBytes: (URL) -> Int64?
     @ObservationIgnored private var noticeTask: Task<Void, Never>?
     /// `recoverLeftovers` を済ませたか。2 回目に録画中の `*.partial.mp4` を消さないため
     @ObservationIgnored private var hasRecovered = false
 
-    init(library: PhotoLibrary = SystemPhotoLibrary(), directory: URL = MediaSaver.defaultDirectory) {
+    init(library: PhotoLibrary = SystemPhotoLibrary(), directory: URL = MediaSaver.defaultDirectory,
+         freeBytes: @escaping (URL) -> Int64? = MediaSaver.freeBytes(at:)) {
         self.library = library
         self.directory = directory
+        self.freeBytes = freeBytes
     }
 
     /// 許可を確かめる。断られていたら notice を `.permissionDenied` にして false。
@@ -103,7 +107,7 @@ final class MediaSaver {
     /// 空き容量が足りるか。足りなければ notice を `.lowStorage` にして false。
     /// 空きを調べられないときは止めない。
     func ensureStorage() -> Bool {
-        if let free = Self.freeBytes(at: directory), free < Self.minimumFreeBytes {
+        if let free = freeBytes(directory), free < Self.minimumFreeBytes {
             report(.lowStorage)
             return false
         }

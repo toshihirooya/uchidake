@@ -38,6 +38,8 @@ final class ViewerEngine {
     private let audio = AudioPipe()
     /// 写真の復元は時間がかかるので、`queue` を止めないよう別のキューで行う
     private let stillQueue = DispatchQueue(label: "uchidake.viewer.still")
+    /// 空きを調べる（テストでは差し替える）
+    private let freeBytes: (URL) -> Int64?
 
     // 以下は queue の上だけで触る
     private var connection: NWConnection?
@@ -70,10 +72,12 @@ final class ViewerEngine {
     var sentForTesting: ((Data) -> Void)?
     #endif
 
-    init(endpoint: NWEndpoint, key: Data, layer: AVSampleBufferDisplayLayer) {
+    init(endpoint: NWEndpoint, key: Data, layer: AVSampleBufferDisplayLayer,
+         freeBytes: @escaping (URL) -> Int64? = MediaSaver.freeBytes(at:)) {
         self.endpoint = endpoint
         self.key = key
         self.layer = layer
+        self.freeBytes = freeBytes
     }
 
     // MARK: - 開始と終了
@@ -232,6 +236,11 @@ final class ViewerEngine {
     func receiveForTesting(_ packet: MediaPacket) {
         queue.async { self.handle(packet) }
     }
+
+    /// テスト用: 1 秒ごとの見回りを 1 回だけ行う。
+    func tickForTesting() {
+        queue.async { self.tick() }
+    }
     #endif
 
     // MARK: - 接続
@@ -286,7 +295,7 @@ final class ViewerEngine {
         guard !isStopped else { return }
         let now = Date()
         // 空きが少なくなったら、書き込みに失敗する前に止める（失敗するとそこまでの録画が再生できない）
-        if let recording, let free = MediaSaver.freeBytes(at: recording.directory), free < MediaSaver.minimumFreeBytes {
+        if let recording, let free = freeBytes(recording.directory), free < MediaSaver.minimumFreeBytes {
             endRecording(lowStorage: true)
         }
         if isConnectionReady {
