@@ -13,8 +13,6 @@ enum PairingKey {
 
     private static let service = "com.example.Uchidake.psk"
     private static let account = "v2"
-    /// 合言葉から作っていたころの鍵。引き継がずに消す。
-    private static let legacyAccount = "v1"
 
     /// 新しい鍵を作る。
     static func generate() -> Data? {
@@ -80,8 +78,6 @@ enum PairingKey {
     }
 
     static func load() -> Data? {
-        // 合言葉のころの鍵が残っていたら消す
-        SecItemDelete(baseQuery(account: legacyAccount) as CFDictionary)
         var query = baseQuery(account: account)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne

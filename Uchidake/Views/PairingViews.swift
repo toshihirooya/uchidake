@@ -23,45 +23,22 @@ struct SetupView: View {
                         .foregroundStyle(.secondary)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        Label("ほかの端末で設定済みのとき", systemImage: "qrcode.viewfinder")
-                            .font(.title3.bold())
-                        Text("設定済みの端末で「端末を追加」を押し、表示された QR コードを読み取ります。")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        Button {
-                            scanning = true
-                        } label: {
-                            Text("QR コードを読み取る")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 6)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(Theme.accent)
-                        .foregroundStyle(.black)
+                        Text("使い始めるまで")
+                            .font(.headline)
+                        GuideStep(number: 1, text: "1 台目の端末で「新しく始める」を押す")
+                        GuideStep(number: 2, text: "1 台目に表示される QR コードを、2 台目の端末で読み取る")
+                        GuideStep(number: 3, text: "片方をカメラにして置き、もう片方で映像を見る")
                     }
                     .padding(20)
-                    .background(Theme.panel, in: RoundedRectangle(cornerRadius: 20))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.panel.opacity(0.6), in: RoundedRectangle(cornerRadius: 20))
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("これが 1 台目のとき", systemImage: "sparkles")
-                            .font(.title3.bold())
-                        Text("この端末で新しい鍵を作ります。2 台目からは、この端末の QR コードを読み取って追加します。")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        Button {
-                            failed = !model.createKey()
-                        } label: {
-                            Text("新しく始める")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 6)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(Theme.accent)
-                    }
-                    .padding(20)
-                    .background(Theme.panel, in: RoundedRectangle(cornerRadius: 20))
+                    Text("この端末は、どちらですか?")
+                        .font(.headline)
+                        .padding(.top, 4)
+
+                    firstDeviceCard
+                    otherDeviceCard
 
                     if failed {
                         Text("鍵を保存できませんでした。もう一度試してください。")
@@ -78,10 +55,81 @@ struct SetupView: View {
             PairingScanView()
         }
     }
+
+    private var otherDeviceCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("2 台目からの端末", systemImage: "qrcode.viewfinder")
+                .font(.title3.bold())
+            Text("すでに始めている端末で「端末を追加」を押し、表示された QR コードをこの端末で読み取ります。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Button {
+                scanning = true
+            } label: {
+                Text("QR コードを読み取る")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Theme.accent)
+            .foregroundStyle(.black)
+        }
+        .padding(20)
+        .background(Theme.panel, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private var firstDeviceCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("1 台目の端末", systemImage: "sparkles")
+                .font(.title3.bold())
+            Text("この端末で新しい鍵を作ります。続けて、2 台目に読み取らせる QR コードを表示します。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Text("ほかの端末ですでに始めているときは、ここは押さずに「QR コードを読み取る」を使ってください。別の鍵になり、つながりません。")
+                .font(.footnote)
+                .foregroundStyle(Theme.warning)
+            Button {
+                failed = !model.createKey()
+            } label: {
+                Text("新しく始める")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Theme.accent)
+            .foregroundStyle(.black)
+        }
+        .padding(20)
+        .background(Theme.panel, in: RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+/// 番号つきの手順 1 行。
+struct GuideStep: View {
+    let number: Int
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text("\(number)")
+                .font(.footnote.bold().monospacedDigit())
+                .foregroundStyle(.black)
+                .frame(width: 22, height: 22)
+                .background(Theme.accent, in: Circle())
+            Text(text)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
+    }
 }
 
 /// 端末を追加するための QR コードの表示。鍵そのものなので、開いているあいだだけ見せる。
 struct PairingCodeView: View {
+    /// 1 台目で鍵を作った直後に、続けて開いているか
+    var isFirstDevice = false
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var image: UIImage?
@@ -91,12 +139,20 @@ struct PairingCodeView: View {
             Theme.background.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 16) {
-                    Text("端末を追加")
+                    Text(isFirstDevice ? "2 台目を追加" : "端末を追加")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                    Text("追加する端末でうちだけカメラを開き、「QR コードを読み取る」でこのコードを写してください。")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
+                    if isFirstDevice {
+                        Text("鍵を作りました。続けて、もう 1 台の端末をつなぎます。")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    VStack(alignment: .leading, spacing: 10) {
+                        GuideStep(number: 1, text: "追加する端末で、うちだけカメラを開く")
+                        GuideStep(number: 2, text: "「QR コードを読み取る」を押す")
+                        GuideStep(number: 3, text: "下の QR コードを写す")
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                     Group {
                         if let image {
@@ -120,7 +176,7 @@ struct PairingCodeView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Text("閉じる")
+                        Text(isFirstDevice ? "読み取りが済んだら、次へ" : "閉じる")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 6)

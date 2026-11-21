@@ -25,17 +25,13 @@ struct HomeView: View {
                     }
                     .padding(.top, 32)
 
+                    if model.setupNotice != nil {
+                        nextStepCard
+                    }
+
                     viewerCard
                     cameraCard
-
-                    Button {
-                        showingCode = true
-                    } label: {
-                        Label("端末を追加", systemImage: "qrcode")
-                    }
-                    .font(.callout)
-                    .tint(Theme.accent)
-                    .padding(.top, 4)
+                    addDeviceCard
 
                     Button("設定をやり直す") {
                         confirmingReset = true
@@ -49,8 +45,19 @@ struct HomeView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
-        .sheet(isPresented: $showingCode) {
-            PairingCodeView()
+        .sheet(isPresented: $showingCode, onDismiss: {
+            // 2 台目の追加の案内は 1 回だけ。閉じたあとは、次にすることの案内だけ残す
+            if model.setupNotice == .created {
+                model.setupNotice = .joined
+            }
+        }) {
+            PairingCodeView(isFirstDevice: model.setupNotice == .created)
+        }
+        .onAppear {
+            // 1 台目で鍵を作った直後は、続けて 2 台目を追加できるように QR コードを出す
+            if model.setupNotice == .created {
+                showingCode = true
+            }
         }
         .confirmationDialog(
             "この端末の鍵を消して、最初の設定からやり直します。",
@@ -63,6 +70,57 @@ struct HomeView: View {
         } message: {
             Text("ほかの端末とは、同じ QR コードで設定し直すまでつながらなくなります。")
         }
+    }
+
+    /// 設定が済んだ直後にだけ出す、次にすることの案内。
+    private var nextStepCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("準備ができました", systemImage: "checkmark.circle.fill")
+                    .font(.headline)
+                    .foregroundStyle(Theme.accent)
+                Spacer()
+                Button {
+                    model.setupNotice = nil
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.footnote.bold())
+                        .foregroundStyle(.secondary)
+                        .frame(width: 32, height: 32)
+                }
+                .accessibilityLabel("案内を閉じる")
+            }
+            Text("見守りたい場所に置く端末で「カメラを始める」を、手元の端末で「カメラを探す」を押してください。")
+                .font(.footnote)
+            Text("ほかの端末をつなぐときは、下の「端末を追加」から QR コードを表示します。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(Theme.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Theme.accent.opacity(0.5)))
+    }
+
+    private var addDeviceCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("端末を追加", systemImage: "qrcode")
+                .font(.title3.bold())
+            Text("もう 1 台の iPhone / iPad をつなぐときは、この端末に QR コードを表示して、追加する端末で読み取ります。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Button {
+                showingCode = true
+            } label: {
+                Text("QR コードを表示")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.bordered)
+            .tint(Theme.accent)
+        }
+        .padding(20)
+        .background(Theme.panel, in: RoundedRectangle(cornerRadius: 20))
     }
 
     private var viewerCard: some View {

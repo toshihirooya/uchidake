@@ -43,17 +43,28 @@ final class AppModel {
     @ObservationIgnored private var didResume = false
 
     var hasKey: Bool { key != nil }
+    /// 設定が済んだ直後か。最初の画面で、次にすることを案内するために使う。
+    var setupNotice: SetupNotice?
+
+    enum SetupNotice {
+        /// この端末で鍵を作った（1 台目）。続けて 2 台目を追加してもらう。
+        case created
+        /// ほかの端末の QR コードを読み取った（2 台目以降）。
+        case joined
+    }
 
     /// 最初の 1 台として、新しい鍵を作る。
     func createKey() -> Bool {
-        guard let generated = PairingKey.generate() else { return false }
-        return adopt(generated)
+        guard let generated = PairingKey.generate(), adopt(generated) else { return false }
+        setupNotice = .created
+        return true
     }
 
     /// ほかの端末の QR コードから読み取った鍵を使う。
     func adoptKey(fromCode code: String) -> Bool {
-        guard let scanned = PairingKey.key(fromCode: code) else { return false }
-        return adopt(scanned)
+        guard let scanned = PairingKey.key(fromCode: code), adopt(scanned) else { return false }
+        setupNotice = .joined
+        return true
     }
 
     private func adopt(_ newKey: Data) -> Bool {
@@ -67,6 +78,7 @@ final class AppModel {
         backHome()
         PairingKey.delete()
         key = nil
+        setupNotice = nil
     }
 
     /// この端末をカメラにする。
