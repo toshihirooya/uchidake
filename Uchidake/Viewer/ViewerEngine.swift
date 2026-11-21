@@ -145,7 +145,7 @@ final class ViewerEngine {
                 // DTLS のハンドシェイクが通った。カメラに「見ている」と知らせて受信を始める。
                 self.isConnectionReady = true
                 self.lastHeard = Date()
-                self.send(MediaPacket.keepAlive.encoded())
+                self.send(MediaPacket.keepAlive(isRecording: false).encoded())
                 self.receive(on: connection)
             case .failed:
                 self.reconnectSoon()
@@ -181,7 +181,7 @@ final class ViewerEngine {
         guard !isStopped else { return }
         let now = Date()
         if isConnectionReady {
-            send(MediaPacket.keepAlive.encoded())
+            send(MediaPacket.keepAlive(isRecording: false).encoded())
             if now.timeIntervalSince(lastHeard) > Self.silenceTimeout {
                 // カメラが止まった、または離れた
                 reconnectSoon()
