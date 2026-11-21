@@ -48,6 +48,13 @@ final class H264Encoder {
         }
     }
 
+    /// 渡し終えたフレームの圧縮をすべて終わらせる（`onFrame` が呼ばれ終わるまで待つ）
+    func finish() {
+        if let session {
+            VTCompressionSessionCompleteFrames(session, untilPresentationTimeStamp: .invalid)
+        }
+    }
+
     func stop() {
         if let session {
             VTCompressionSessionInvalidate(session)
@@ -107,6 +114,22 @@ final class H264Encoder {
 enum VideoFrames {
     /// `H264Encoder` が作ったフレームから。`format` はキーフレームを受けるたびに更新される。
     static func compressedSampleBuffer(from frame: Data, format: inout CMFormatDescription?) -> CMSampleBuffer? {
+        guard let sampleBuffer = makeCompressedSampleBuffer(from: frame, format: &format, timing: nil) else { return nil }
+        markDisplayImmediately(sampleBuffer)
+        return sampleBuffer
+    }
+
+    /// 録画用。表示用と同じだが、`time` を表示時刻として付け、「すぐ表示」の印は付けない。
+    static func timedSampleBuffer(from frame: Data, format: inout CMFormatDescription?, at time: CMTime) -> CMSampleBuffer? {
+        // フレームの並べ替えをしない圧縮なので、復元の時刻は表示の時刻と同じ（付けなくてよい）
+        let timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
+        return makeCompressedSampleBuffer(from: frame, format: &format, timing: timing)
+    }
+
+    /// `H264Encoder` のフレームを CMSampleBuffer にする。`timing` が nil なら時刻を付けない。
+    private static func makeCompressedSampleBuffer(
+        from frame: Data, format: inout CMFormatDescription?, timing: CMSampleTimingInfo?
+    ) -> CMSampleBuffer? {
         let bytes = [UInt8](frame)
         guard !bytes.isEmpty else { return nil }
         var offset = 1
@@ -138,12 +161,12 @@ enum VideoFrames {
 
         var sampleBuffer: CMSampleBuffer?
         var sampleSize = length
-        CMSampleBufferCreateReady(
-            allocator: kCFAllocatorDefault, dataBuffer: block, formatDescription: format,
-            sampleCount: 1, sampleTimingEntryCount: 0, sampleTimingArray: nil,
-            sampleSizeEntryCount: 1, sampleSizeArray: &sampleSize, sampleBufferOut: &sampleBuffer)
-        if let sampleBuffer {
-            markDisplayImmediately(sampleBuffer)
+        withUnsafePointer(to: timing ?? CMSampleTimingInfo()) { timingEntry in
+            _ = CMSampleBufferCreateReady(
+                allocator: kCFAllocatorDefault, dataBuffer: block, formatDescription: format,
+                sampleCount: 1, sampleTimingEntryCount: timing == nil ? 0 : 1,
+                sampleTimingArray: timing == nil ? nil : timingEntry,
+                sampleSizeEntryCount: 1, sampleSizeArray: &sampleSize, sampleBufferOut: &sampleBuffer)
         }
         return sampleBuffer
     }
