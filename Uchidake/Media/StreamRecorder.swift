@@ -1,24 +1,44 @@
 import AVFoundation
 import CoreMedia
 
-/// 音声のコマに時刻を付ける。届いた順に連続で並べ、届いた時刻から 0.2 秒以上ずれたら合わせ直す。
+/// 音声のコマに時刻を付ける。届いた順に連続で並べ、届いた時刻より 0.2 秒以上遅れたら合わせ直す。
 ///
 /// 届く間隔はゆらぐので、届いた時刻をそのまま使うと音が重なったり途切れたりする。
-/// 続けて並べつつ、パケットが抜けたときなどに大きくずれたら、届いた時刻に戻す（そこは無音になる）。
+/// 続けて並べつつ、パケットが抜けたときなどに届いた時刻より大きく遅れたら、届いた時刻まで進める。
+/// 進めたぶんは無音で埋める（書き手は時刻を飛ばしても詰めて書くので、埋めないと音が映像より先に進む）。
+/// 戻すことはしない（止まったあとにまとめて届いても、前の音に重ねない）。
 struct AudioTimeline {
     static let sampleRate: Int32 = 16_000
     static let resyncThreshold = CMTime(value: 1, timescale: 5)
 
+    /// パケットを置く場所
+    struct Placement {
+        /// パケットの始まりの時刻
+        let start: CMTime
+        /// パケットの前に入れる無音のサンプル数（0 なら入れない）。無音は `silenceStart` から `start` まで
+        let silence: Int
+
+        var silenceStart: CMTime {
+            start - CMTime(value: CMTimeValue(silence), timescale: AudioTimeline.sampleRate)
+        }
+    }
+
     /// 前のパケットの続きになる時刻
     private var next: CMTime?
 
-    mutating func timestamp(sampleCount: Int, arrival: CMTime) -> CMTime {
+    mutating func place(sampleCount: Int, arrival: CMTime) -> Placement {
         var start = arrival
-        if let next, CMTimeAbsoluteValue(arrival - next) < Self.resyncThreshold {
+        var silence = 0
+        if let next {
             start = next
+            if arrival - next >= Self.resyncThreshold {
+                // 届いた時刻まで、サンプル単位で進める（音がとぎれずに続くように）
+                silence = Int(((arrival - next).seconds * Double(Self.sampleRate)).rounded())
+                start = next + CMTime(value: CMTimeValue(silence), timescale: Self.sampleRate)
+            }
         }
         next = start + CMTime(value: CMTimeValue(sampleCount), timescale: Self.sampleRate)
-        return start
+        return Placement(start: start, silence: silence)
     }
 }
 
@@ -144,9 +164,18 @@ final class StreamRecorder {
         guard !hasFailed, !isFinished, let file, file.hasFrames else { return }
         let sampleCount = pcm.count / 2
         guard sampleCount > 0 else { return }
-        let start = timeline.timestamp(sampleCount: sampleCount, arrival: time)
-        guard file.audio.isReadyForMoreMediaData,
-              let sample = makeAudioSample(pcm, sampleCount: sampleCount, at: start) else { return }
+        let placement = timeline.place(sampleCount: sampleCount, arrival: time)
+        guard file.audio.isReadyForMoreMediaData else { return }
+        if placement.silence > 0 {
+            // 届かなかったあいだを無音で埋める
+            guard let silence = makeAudioSample(
+                Data(count: placement.silence * 2), sampleCount: placement.silence, at: placement.silenceStart) else { return }
+            guard file.audio.append(silence) else {
+                fail()
+                return
+            }
+        }
+        guard let sample = makeAudioSample(pcm, sampleCount: sampleCount, at: placement.start) else { return }
         if !file.audio.append(sample) {
             fail()
         }

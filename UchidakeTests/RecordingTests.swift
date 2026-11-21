@@ -140,15 +140,36 @@ final class StillDecoderTests: XCTestCase {
 final class AudioTimelineTests: XCTestCase {
     func testPacketsArrivingOnTimeAreContiguous() {
         var timeline = AudioTimeline()
-        XCTAssertEqual(timeline.timestamp(sampleCount: 480, arrival: hostTime(10.000)).seconds, 10.000, accuracy: 0.0001)
+        XCTAssertEqual(timeline.place(sampleCount: 480, arrival: hostTime(10.000)).start.seconds, 10.000, accuracy: 0.0001)
         // 少し遅れて届いても、前の続きに置く
-        XCTAssertEqual(timeline.timestamp(sampleCount: 480, arrival: hostTime(10.050)).seconds, 10.030, accuracy: 0.0001)
+        let late = timeline.place(sampleCount: 480, arrival: hostTime(10.050))
+        XCTAssertEqual(late.start.seconds, 10.030, accuracy: 0.0001)
+        XCTAssertEqual(late.silence, 0)
     }
 
-    func testAGapLongerThanThresholdResyncsToArrival() {
+    // 合わせ直すときは、前の音の終わりから届いた時刻までを無音で埋める
+    func testAGapLongerThanThresholdResyncsToArrivalWithSilence() {
         var timeline = AudioTimeline()
-        _ = timeline.timestamp(sampleCount: 480, arrival: hostTime(10))
-        XCTAssertEqual(timeline.timestamp(sampleCount: 480, arrival: hostTime(11)).seconds, 11, accuracy: 0.0001)
+        _ = timeline.place(sampleCount: 480, arrival: hostTime(10))
+        let resynced = timeline.place(sampleCount: 480, arrival: hostTime(11))
+        XCTAssertEqual(resynced.start.seconds, 11, accuracy: 0.0001)
+        XCTAssertEqual(resynced.silence, 15_520)  // 10.03 秒から 11 秒まで
+        XCTAssertEqual(resynced.silenceStart.seconds, 10.030, accuracy: 0.0001)
+    }
+
+    // 止まったあとにまとめて届いても、時刻は戻さない（前の音に重ねない）
+    func testBurstAfterStallNeverMovesBackward() {
+        var timeline = AudioTimeline()
+        _ = timeline.place(sampleCount: 480, arrival: hostTime(10))
+        // 0.22 秒止まって、たまっていた 10 個が同じ時刻にまとめて届く
+        var previous = timeline.place(sampleCount: 480, arrival: hostTime(10.25))
+        XCTAssertEqual(previous.start.seconds, 10.25, accuracy: 0.0001)
+        for _ in 0..<9 {
+            let placement = timeline.place(sampleCount: 480, arrival: hostTime(10.25))
+            XCTAssertEqual((placement.start - previous.start).seconds, 0.03, accuracy: 0.0001)
+            XCTAssertEqual(placement.silence, 0)
+            previous = placement
+        }
     }
 }
 
@@ -203,6 +224,27 @@ final class StreamRecorderTests: XCTestCase {
         let duration = try await asset.load(.duration).seconds
         XCTAssertEqual(duration, 1.0, accuracy: 0.2)
         XCTAssertTrue(try FileManager.default.contentsOfDirectory(atPath: directory.path).allSatisfy { !$0.contains(".partial") })
+    }
+
+    // 音声が 2 秒届かなかったあとも、音声は映像と同じ時刻に並ぶ（届かなかったところは無音）
+    func testAudioGapKeepsAudioAlignedWithVideo() async throws {
+        let frames = makeFrames(count: 120)
+        let urls = record { recorder in
+            // 映像は 4 秒間、届いた時刻のまま。音声は始めの 1 秒と終わりの 1 秒だけ届く
+            for (i, frame) in frames.enumerated() { recorder.appendVideo(frame, at: hostTime(100 + Double(i) / 30)) }
+            for i in 0..<33 { recorder.appendAudio(Data(count: 960), at: hostTime(100 + Double(i) * 0.03)) }
+            for i in 0..<33 { recorder.appendAudio(Data(count: 960), at: hostTime(103 + Double(i) * 0.03)) }
+        }
+        XCTAssertEqual(urls.count, 1)
+        let asset = AVURLAsset(url: urls[0])
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        let video = try XCTUnwrap(videoTracks.first), audio = try XCTUnwrap(audioTracks.first)
+        let videoRange = try await video.load(.timeRange)
+        let audioRange = try await audio.load(.timeRange)
+        XCTAssertEqual(videoRange.duration.seconds, 4.0, accuracy: 0.1)
+        XCTAssertEqual(audioRange.start.seconds, videoRange.start.seconds, accuracy: 0.1)
+        XCTAssertEqual(audioRange.end.seconds, videoRange.end.seconds, accuracy: 0.15)
     }
 
     // Review Focus 3
