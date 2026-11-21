@@ -33,12 +33,102 @@
         }
       }
     },
+    "1 台目に表示される QR コードを、2 台目の端末で読み取る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan the QR code shown on the first device with your second device"
+          }
+        }
+      }
+    },
+    "1 台目の端末" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First device"
+          }
+        }
+      }
+    },
+    "1 台目の端末で「新しく始める」を押す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On your first device, tap “Start fresh”"
+          }
+        }
+      }
+    },
+    "2 台目からの端末" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Second device or later"
+          }
+        }
+      }
+    },
+    "2 台目を追加" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your second device"
+          }
+        }
+      }
+    },
+    "QR コードを表示" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show QR code"
+          }
+        }
+      }
+    },
+    "QR コードを読み取る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan QR code"
+          }
+        }
+      }
+    },
+    "「QR コードを読み取る」を押す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap “Scan QR code”"
+          }
+        }
+      }
+    },
     "いまは誰も見ていません" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No one is watching right now"
+          }
+        }
+      }
+    },
+    "この QR コードは家の鍵と同じです。写真に撮ったり、人に送ったりしないでください。写した人は映像を見られます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This QR code is like your house key. Don't photograph it or send it to anyone. Whoever has it can watch your video."
           }
         }
       }
@@ -53,22 +143,112 @@
         }
       }
     },
-    "この合言葉にする" : {
+    "このアプリの QR コードではありません。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Use this passphrase"
+            "value" : "This QR code isn't from this app."
           }
         }
       }
     },
-    "つながりません。この端末の合言葉がカメラと同じか、カメラの端末でアプリが開いているかを確かめてください。" : {
+    "この端末ではカメラを使えません。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Can't connect. Check that this device has the same passphrase as the camera, and that the app is open on the camera."
+            "value" : "The camera isn't available on this device."
+          }
+        }
+      }
+    },
+    "この端末で新しい鍵を作ります。続けて、2 台目に読み取らせる QR コードを表示します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This creates a new key on this device, then shows a QR code for your second device to scan."
+          }
+        }
+      }
+    },
+    "この端末の鍵を消して、最初の設定からやり直します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This erases the key on this device and starts setup over."
+          }
+        }
+      }
+    },
+    "この端末は、どちらですか?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which one is this device?"
+          }
+        }
+      }
+    },
+    "すでに始めている端末で「端末を追加」を押し、表示された QR コードをこの端末で読み取ります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On a device that is already set up, tap “Add a device”, then scan the QR code it shows with this device."
+          }
+        }
+      }
+    },
+    "つながりません。この端末をカメラと同じ QR コードで設定したか、カメラの端末でアプリが開いているかを確かめてください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't connect. Check that this device was set up with the same QR code as the camera, and that the app is open on the camera."
+          }
+        }
+      }
+    },
+    "ほかの端末ですでに始めているときは、ここは押さずに「QR コードを読み取る」を使ってください。別の鍵になり、つながりません。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you have already started on another device, don't tap this. Use “Scan QR code” instead. Otherwise this device gets a different key and can't connect."
+          }
+        }
+      }
+    },
+    "ほかの端末とは、同じ QR コードで設定し直すまでつながらなくなります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device can't connect to your other devices until you set it up again with the same QR code."
+          }
+        }
+      }
+    },
+    "ほかの端末をつなぐときは、下の「端末を追加」から QR コードを表示します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To connect another device, show the QR code from “Add a device” below."
+          }
+        }
+      }
+    },
+    "もう 1 台の iPhone / iPad をつなぐときは、この端末に QR コードを表示して、追加する端末で読み取ります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To connect another iPhone or iPad, show a QR code on this device and scan it with the one you are adding."
           }
         }
       }
@@ -103,12 +283,12 @@
         }
       }
     },
-    "カメラにする端末と、映像を見る端末のすべてに、同じ合言葉を入れてください。合言葉が同じ端末どうしだけがつながり、通信は暗号化されます。" : {
+    "カメラにする端末と、映像を見る端末で、同じ鍵を持ちます。鍵が同じ端末どうしだけがつながり、通信は暗号化されます。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter the same passphrase on every device: the camera and each device you watch from. Only devices with the same passphrase can connect, and everything they send is encrypted."
+            "value" : "The camera and the devices you watch from share one key. Only devices with the same key can connect, and everything they send is encrypted."
           }
         }
       }
@@ -233,6 +413,26 @@
         }
       }
     },
+    "下の QR コードを写す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Point it at the QR code below"
+          }
+        }
+      }
+    },
+    "使い始めるまで" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to get started"
+          }
+        }
+      }
+    },
     "使っていない iPhone を、見守りたい場所に置きます。充電しながら、アプリを開いたままにしてください。" : {
       "localizations" : {
         "en" : {
@@ -259,56 +459,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Switch to front camera"
-          }
-        }
-      }
-    },
-    "合言葉を保存できませんでした。もう一度試してください。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't save the passphrase. Please try again."
-          }
-        }
-      }
-    },
-    "合言葉を変更" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change passphrase"
-          }
-        }
-      }
-    },
-    "合言葉を決める" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a passphrase"
-          }
-        }
-      }
-    },
-    "合言葉（%lld文字以上）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passphrase (%lld+ characters)"
-          }
-        }
-      }
-    },
-    "変更すると、ほかの端末にも同じ合言葉を入れ直すまでつながらなくなります。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "After you change it, other devices can't connect until you enter the same passphrase on them."
           }
         }
       }
@@ -403,6 +553,16 @@
         }
       }
     },
+    "新しく始める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start fresh"
+          }
+        }
+      }
+    },
     "映像は、家の中の端末どうしでだけやり取りします" : {
       "localizations" : {
         "en" : {
@@ -423,12 +583,72 @@
         }
       }
     },
+    "案内を閉じる" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss this tip"
+          }
+        }
+      }
+    },
+    "準備ができました" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're all set"
+          }
+        }
+      }
+    },
+    "片方をカメラにして置き、もう片方で映像を見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set one down as the camera and watch from the other"
+          }
+        }
+      }
+    },
     "画面をタップすると戻ります" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap the screen to wake it"
+          }
+        }
+      }
+    },
+    "端末をつなぐ準備" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get your devices ready"
+          }
+        }
+      }
+    },
+    "端末を追加" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a device"
+          }
+        }
+      }
+    },
+    "端末を追加するための QR コード" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR code for adding a device"
           }
         }
       }
@@ -443,16 +663,6 @@
         }
       }
     },
-    "自動で作る" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Generate one"
-          }
-        }
-      }
-    },
     "見ている端末には映像が届かなくなります。" : {
       "localizations" : {
         "en" : {
@@ -463,12 +673,102 @@
         }
       }
     },
+    "見守りたい場所に置く端末で「カメラを始める」を、手元の端末で「カメラを探す」を押してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap “Start camera” on the device you leave where you want to watch, and “Find cameras” on the device you keep with you."
+          }
+        }
+      }
+    },
+    "設定をやり直す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start setup over"
+          }
+        }
+      }
+    },
+    "設定を開く" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        }
+      }
+    },
+    "設定済みの端末で「端末を追加」を押し、表示された QR コードを枠に入れてください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On a device that is already set up, tap “Add a device”, then fit the QR code it shows in the frame."
+          }
+        }
+      }
+    },
     "話しています" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Talking"
+          }
+        }
+      }
+    },
+    "読み取りが済んだら、次へ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done scanning? Continue"
+          }
+        }
+      }
+    },
+    "追加する端末で、%@を開く" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open %@ on the device you are adding"
+          }
+        }
+      }
+    },
+    "鍵を作りました。続けて、もう 1 台の端末をつなぎます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The key is ready. Next, connect one more device."
+          }
+        }
+      }
+    },
+    "鍵を保存できませんでした。もう一度試してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the key. Please try again."
+          }
+        }
+      }
+    },
+    "鍵を消してやり直す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase key and start over"
           }
         }
       }

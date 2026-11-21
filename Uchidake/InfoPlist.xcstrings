@@ -24,13 +24,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The camera is used to turn this iPhone into a monitor camera and send video to other devices in your home."
+            "value" : "The camera is used to turn this iPhone into a monitor camera that sends video to other devices in your home, and to scan a QR code when you add a device."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "この iPhone を見守りカメラにして、家の中の別の端末に映像を送るためにカメラを使用します。"
+            "value" : "この iPhone を見守りカメラにして家の中の別の端末に映像を送るため、また端末を追加するときに QR コードを読み取るためにカメラを使用します。"
           }
         }
       }

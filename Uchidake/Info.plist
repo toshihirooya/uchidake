@@ -25,7 +25,7 @@
 		<string>_uchidake._udp</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>この iPhone を見守りカメラにして、家の中の別の端末に映像を送るためにカメラを使用します。</string>
+	<string>この iPhone を見守りカメラにして家の中の別の端末に映像を送るため、また端末を追加するときに QR コードを読み取るためにカメラを使用します。</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>家の中にあるカメラと、映像を見る端末をつなぐために、ローカルネットワークを使用します。</string>
 	<key>NSMicrophoneUsageDescription</key>

@@ -13,7 +13,7 @@ final class ViewerEngine {
 
     struct Snapshot: Equatable {
         var phase: Phase = .connecting
-        /// つなごうとして、時間切れになった回数。合言葉が違うと増え続ける。
+        /// つなごうとして、時間切れになった回数。鍵が違うと増え続ける。
         var failedAttempts = 0
         var status: CameraStatus?
         var videoFrames = 0
@@ -187,7 +187,7 @@ final class ViewerEngine {
                 reconnectSoon()
             }
         } else if connection != nil, now.timeIntervalSince(attemptStarted) > Self.connectTimeout {
-            // 合言葉（鍵）が違うと、ハンドシェイクが失敗にならず待ち続ける。時間で見切ってやり直す。
+            // 鍵が違うと、ハンドシェイクが失敗にならず待ち続ける。時間で見切ってやり直す。
             snapshot.failedAttempts += 1
             publish()
             connect()

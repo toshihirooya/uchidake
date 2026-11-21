@@ -69,7 +69,7 @@ final class CameraFinder {
 final class ViewerSession: Identifiable {
     let cameraName: String
     private(set) var isLive = false
-    /// つなごうとして時間切れになった回数。合言葉が違うと増え続ける。
+    /// つなごうとして時間切れになった回数。鍵が違うと増え続ける。
     private(set) var failedAttempts = 0
     private(set) var status: CameraStatus?
     private(set) var videoFrames = 0

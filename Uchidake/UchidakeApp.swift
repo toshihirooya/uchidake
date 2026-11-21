@@ -20,7 +20,7 @@ struct UchidakeApp: App {
     }
 }
 
-/// いまどの画面にいるか（最初の画面・カメラ・見る側）と、合言葉の鍵。
+/// いまどの画面にいるか（最初の画面・カメラ・見る側）と、端末どうしで共有する鍵。
 @MainActor
 @Observable
 final class AppModel {
@@ -36,24 +36,50 @@ final class AppModel {
     static let defaultCameraName = String(localized: "カメラ")
 
     private(set) var mode: Mode = .home
-    /// 合言葉から作った鍵。未設定なら nil。
-    private(set) var key: Data? = PassphraseKey.load()
+    /// 端末どうしで共有する鍵。未設定なら nil。
+    private(set) var key: Data? = PairingKey.load()
     /// 検証用: 見る側で、最初に見つかったカメラを自動で開く
     private(set) var opensFirstCamera = false
 
     @ObservationIgnored private var didResume = false
 
-    var hasPassphrase: Bool { key != nil }
+    var hasKey: Bool { key != nil }
+    /// 設定が済んだ直後か。最初の画面で、次にすることを案内するために使う。
+    var setupNotice: SetupNotice?
 
-    /// 合言葉を設定（または変更）する。
-    func setPassphrase(_ passphrase: String) async -> Bool {
-        guard PassphraseKey.isValid(passphrase) else { return false }
-        // 鍵の導出は重いのでメインスレッドの外で行う
-        let derived = await Task.detached { PassphraseKey.derive(from: passphrase) }.value
-        guard let derived else { return false }
-        PassphraseKey.save(derived)
-        key = derived
+    enum SetupNotice {
+        /// この端末で鍵を作った（1 台目）。続けて 2 台目を追加してもらう。
+        case created
+        /// ほかの端末の QR コードを読み取った（2 台目以降）。
+        case joined
+    }
+
+    /// 最初の 1 台として、新しい鍵を作る。
+    func createKey() -> Bool {
+        guard let generated = PairingKey.generate(), adopt(generated) else { return false }
+        setupNotice = .created
         return true
+    }
+
+    /// ほかの端末の QR コードから読み取った鍵を使う。
+    func adoptKey(fromCode code: String) -> Bool {
+        guard let scanned = PairingKey.key(fromCode: code), adopt(scanned) else { return false }
+        setupNotice = .joined
+        return true
+    }
+
+    private func adopt(_ newKey: Data) -> Bool {
+        guard PairingKey.save(newKey) else { return false }
+        key = newKey
+        return true
+    }
+
+    /// この端末の鍵を消して、最初の設定からやり直す。
+    func resetKey() {
+        backHome()
+        PairingKey.delete()
+        key = nil
+        setupNotice = nil
     }
 
     /// この端末をカメラにする。
@@ -92,7 +118,7 @@ final class AppModel {
     func resumeLastRole() {
         guard !didResume else { return }
         didResume = true
-        guard case .home = mode, hasPassphrase,
+        guard case .home = mode, hasKey,
               UserDefaults.standard.string(forKey: Self.lastRoleKey) == "camera" else { return }
         startCamera(name: UserDefaults.standard.string(forKey: Self.cameraNameKey) ?? Self.defaultCameraName)
     }
@@ -103,13 +129,13 @@ final class AppModel {
     func applyDebugLaunchOptions() {
         guard !didResume else { return }
         let defaults = UserDefaults.standard
-        let passphrase = defaults.string(forKey: "autoPassphrase")
+        let autoKey = defaults.string(forKey: "autoKey").flatMap(PairingKey.key(base64URL:))
         let role = defaults.string(forKey: "autoRole")
-        guard passphrase != nil || role != nil else { return }
+        guard autoKey != nil || role != nil else { return }
         didResume = true
         Task {
-            if let passphrase {
-                _ = await setPassphrase(passphrase)
+            if let autoKey {
+                _ = adopt(autoKey)
             }
             switch role {
             case "camera":
@@ -129,8 +155,8 @@ struct RootView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        if !model.hasPassphrase {
-            PassphraseView(isChange: false)
+        if !model.hasKey {
+            SetupView()
         } else {
             switch model.mode {
             case .home:
