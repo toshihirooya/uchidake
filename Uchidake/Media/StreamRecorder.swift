@@ -46,6 +46,11 @@ final class StreamRecorder {
     private var timeline = AudioTimeline()
     private var hasFailed = false
     private var isFinished = false
+    /// 映像のコマを落としたあと。差分のコマは落としたコマを参照して壊れるので、次のキーフレームまで書かない
+    private var needsKeyframe = false
+
+    /// テスト用: 映像の入力がコマを受け取れるかの判定を差し替える（nil なら `isReadyForMoreMediaData`）
+    var videoReadinessOverride: ((CMTime) -> Bool)?
 
     private let audioFormat: CMAudioFormatDescription? = {
         var description = AudioStreamBasicDescription(
@@ -93,7 +98,11 @@ final class StreamRecorder {
         guard !hasFailed, !isFinished else { return }
         let isKeyframe = frame.first == 1
         guard isKeyframe || file != nil else { return }
-        guard let sample = VideoFrames.timedSampleBuffer(from: frame, format: &videoFormat, at: time) else { return }
+        guard let sample = VideoFrames.timedSampleBuffer(from: frame, format: &videoFormat, at: time) else {
+            // 読めなかったコマも落としたのと同じ
+            needsKeyframe = true
+            return
+        }
 
         if isKeyframe, let format = sample.formatDescription {
             let sets = Array(format.parameterSets)
@@ -107,8 +116,21 @@ final class StreamRecorder {
             }
         }
         guard let file else { return }
-        // 書き込みが追いつかないときは、そのコマを落とす（遅れをためない）
-        guard file.video.isReadyForMoreMediaData else { return }
+        if isKeyframe {
+            needsKeyframe = false
+        } else if needsKeyframe {
+            return
+        }
+        // 書き込みが追いつかないときは、そのコマを落とす（遅れをためない）。
+        // 後に続く差分のコマは、次のキーフレームが来るまで書かない
+        guard videoReadinessOverride?(time) ?? file.video.isReadyForMoreMediaData else {
+            needsKeyframe = true
+            if !file.hasFrames {
+                // 始めのキーフレームを落とした。このファイルは捨て、次のキーフレームの時刻から作り直す
+                closeFile()
+            }
+            return
+        }
         guard file.video.append(sample) else {
             fail()
             return

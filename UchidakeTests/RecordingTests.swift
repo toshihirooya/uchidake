@@ -236,6 +236,69 @@ final class StreamRecorderTests: XCTestCase {
         XCTAssertEqual(second, CGSize(width: 480, height: 640))
     }
 
+    // 書き込みが追いつかずに落としたコマの後は、次のキーフレームまで差分を書かない
+    func testDroppedFrameSkipsDeltasUntilNextKeyframe() async throws {
+        let first = makeFrames(count: 15), second = makeFrames(count: 15)
+        XCTAssertEqual(second.first?.first, 1)
+        let dropped = hostTime(3.0 / 30)
+        let urls = record { r in
+            r.videoReadinessOverride = { $0 != dropped }
+            for (i, f) in (first + second).enumerated() { r.appendVideo(f, at: hostTime(Double(i) / 30)) }
+        }
+        XCTAssertEqual(urls.count, 1)
+        // 落とす前の 3 コマと、次のキーフレームからの 15 コマ。書き直しはキーフレームから
+        let samples = try await videoSamples(of: urls[0])
+        XCTAssertEqual(samples.count, 18)
+        XCTAssertEqual(samples.map(\.isKeyframe), [true, false, false, true] + Array(repeating: false, count: 14))
+        XCTAssertEqual((samples[3].time - samples[0].time).seconds, 15.0 / 30, accuracy: 0.001)
+    }
+
+    // ファイルの最初のキーフレームを落としたら、差分から始まるファイルにしない
+    func testDroppedOpeningKeyframeWaitsForNextKeyframe() async throws {
+        let first = makeFrames(count: 15), second = makeFrames(count: 15)
+        let urls = record { r in
+            r.videoReadinessOverride = { $0 != hostTime(0) }
+            for (i, f) in (first + second).enumerated() { r.appendVideo(f, at: hostTime(Double(i) / 30)) }
+        }
+        XCTAssertEqual(urls.count, 1)
+        let samples = try await videoSamples(of: urls[0])
+        XCTAssertEqual(samples.count, 15)
+        XCTAssertEqual(samples.first?.isKeyframe, true)
+        // 落としたキーフレームの時刻からではなく、次のキーフレームから始まる（0.5 秒ぶん）
+        let duration = try await AVURLAsset(url: urls[0]).load(.duration).seconds
+        XCTAssertEqual(duration, 0.5, accuracy: 0.1)
+    }
+
+    /// 動画の映像トラックに書かれたコマを順に返す（表示時刻と、キーフレームか）
+    private func videoSamples(of url: URL) async throws -> [(time: CMTime, isKeyframe: Bool)] {
+        let asset = AVURLAsset(url: url)
+        let tracks = try await asset.loadTracks(withMediaType: .video)
+        let track = try XCTUnwrap(tracks.first)
+        let reader = try AVAssetReader(asset: asset)
+        let output = AVAssetReaderTrackOutput(track: track, outputSettings: nil)
+        reader.add(output)
+        XCTAssertTrue(reader.startReading())
+        var samples: [(time: CMTime, isKeyframe: Bool)] = []
+        while let sample = output.copyNextSampleBuffer() {
+            guard CMSampleBufferGetNumSamples(sample) > 0 else { continue }
+            let data = try XCTUnwrap(sample.dataBuffer).dataBytes()
+            samples.append((sample.presentationTimeStamp, containsIDRSlice(data)))
+        }
+        return samples
+    }
+
+    /// AVCC 形式（各 NAL の前に 4 バイトの長さ）のコマに、IDR（種類 5）の NAL があるか
+    private func containsIDRSlice(_ data: Data) -> Bool {
+        let bytes = [UInt8](data)
+        var offset = 0
+        while offset + 4 < bytes.count {
+            let length = bytes[offset..<offset + 4].reduce(0) { $0 << 8 | Int($1) }
+            if bytes[offset + 4] & 0x1F == 5 { return true }
+            offset += 4 + length
+        }
+        return false
+    }
+
     // Review Focus 5
     func testFinishingTwiceProducesOneMovie() {
         // finish を 2 回呼んでも、onFileFinished は 1 回、completion は 2 回とも呼ばれる
