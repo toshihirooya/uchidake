@@ -57,7 +57,7 @@ final class MediaSaver {
     }
 
     /// 録画を始める・続けるのに必要な空き容量
-    static let minimumFreeBytes: Int64 = 200_000_000
+    nonisolated static let minimumFreeBytes: Int64 = 200_000_000
     /// 知らせを出しておく長さ（秒）
     private static let noticeSeconds: UInt64 = 3
 
@@ -81,6 +81,8 @@ final class MediaSaver {
 
     @ObservationIgnored private let library: PhotoLibrary
     @ObservationIgnored private var noticeTask: Task<Void, Never>?
+    /// `recoverLeftovers` を済ませたか。2 回目に録画中の `*.partial.mp4` を消さないため
+    @ObservationIgnored private var hasRecovered = false
 
     init(library: PhotoLibrary = SystemPhotoLibrary(), directory: URL = MediaSaver.defaultDirectory) {
         self.library = library
@@ -134,7 +136,10 @@ final class MediaSaver {
 
     /// 起動時に 1 回呼ぶ。`*.partial.mp4` を消し、残っている `*.mp4` をもう一度追加する。
     /// 許可が無いときは何もしない（ファイルは残す。許可は求めない）。
+    /// 2 回目以降の呼び出しは何もしない（その間に始まった録画の途中のファイルを消さないため）。
     func recoverLeftovers() async {
+        guard !hasRecovered else { return }
+        hasRecovered = true
         guard library.hasAddPermission else { return }
         let files = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
         for url in files.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) where url.pathExtension == "mp4" {

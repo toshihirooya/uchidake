@@ -1,6 +1,7 @@
 import AVFoundation
 import Network
 import Observation
+import UIKit
 
 /// 近くにあるカメラを探す（Bonjour の `_uchidake._udp`）。
 @MainActor
@@ -77,6 +78,11 @@ final class ViewerSession: Identifiable {
     private(set) var isTalking = false
     /// 話しかけようとしたが、マイクが許可されていなかった
     private(set) var microphoneDenied = false
+    private(set) var isRecording = false
+    private(set) var recordingStartedAt: Date?
+    private(set) var canTakePhoto = false
+    /// 写真を撮った瞬間に増える（画面を光らせるきっかけ）。
+    private(set) var photoFlashes = 0
     var isSpeakerMuted = false {
         didSet { engine.setSpeakerMuted(isSpeakerMuted) }
     }
@@ -85,8 +91,13 @@ final class ViewerSession: Identifiable {
     @ObservationIgnored let layer = AVSampleBufferDisplayLayer()
     @ObservationIgnored private let engine: ViewerEngine
     @ObservationIgnored private var isStarted = false
+    @ObservationIgnored private var isClosed = false
+    @ObservationIgnored private let saver: MediaSaver
+    /// 録画を始める途中（許可を待っている）。2 度押しで 2 つ始めないための印
+    @ObservationIgnored private var isStartingRecording = false
 
-    init(camera: CameraFinder.FoundCamera, key: Data) {
+    init(camera: CameraFinder.FoundCamera, key: Data, saver: MediaSaver) {
+        self.saver = saver
         cameraName = camera.name
         layer.videoGravity = .resizeAspect
         engine = ViewerEngine(endpoint: camera.endpoint, key: key, layer: layer)
@@ -108,6 +119,7 @@ final class ViewerSession: Identifiable {
                     self.status = snapshot.status
                     self.videoFrames = snapshot.videoFrames
                     self.audioPackets = snapshot.audioPackets
+                    self.canTakePhoto = snapshot.canTakePhoto
                 }
             }
         }
@@ -120,6 +132,8 @@ final class ViewerSession: Identifiable {
     }
 
     func stop() {
+        stopRecording()
+        isClosed = true
         engine.stop()
         layer.sampleBufferRenderer.flush(removingDisplayedImage: true)
     }
@@ -147,8 +161,91 @@ final class ViewerSession: Identifiable {
         engine.switchCamera()
     }
 
+    // MARK: - 写真と録画
+
+    /// 今見えている 1 枚を「写真」に入れる。
+    func takePhoto() async {
+        guard isLive, canTakePhoto else { return }
+        guard await saver.ensurePermission() else { return }
+        let jpeg = await withCheckedContinuation { continuation in
+            engine.capturePhoto { continuation.resume(returning: $0) }
+        }
+        guard let jpeg else {
+            saver.report(.photoFailed)
+            return
+        }
+        photoFlashes += 1
+        await saver.savePhoto(jpeg)
+    }
+
+    /// 録画中なら止める。そうでなければ、許可と空き容量を確かめてから始める。
+    func toggleRecording() async {
+        if isRecording {
+            stopRecording()
+            return
+        }
+        guard isLive, !isStartingRecording else { return }
+        isStartingRecording = true
+        defer { isStartingRecording = false }
+        // 録り終わってから断られて消える、を避けるため、許可が取れてから始める
+        guard await saver.ensurePermission(), saver.ensureStorage() else { return }
+        // 許可を待っているあいだに、画面が閉じられた・つながりが切れたことがある
+        guard !isClosed, isLive else { return }
+
+        let saver = saver
+        engine.startRecording(directory: saver.directory, onFile: { url in
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated { Self.saveInBackground(url, saver: saver) }
+            }
+        }, onStop: { [weak self] lowStorage in
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    if lowStorage { saver.report(.lowStorage) }
+                    self?.isRecording = false
+                    self?.recordingStartedAt = nil
+                }
+            }
+        })
+        isRecording = true
+        recordingStartedAt = Date()
+    }
+
+    /// 録画中なら止める。画面を閉じるとき、バックグラウンドに回るときに呼ぶ。
+    func stopRecording() {
+        guard isRecording else { return }
+        engine.stopRecording()
+    }
+
+    /// 書き終えた動画を「写真」に入れる。`saver` を強く持つので、セッションが消えても続く。
+    /// バックグラウンドに回っても終えられるよう、時間を確保する。
+    private static func saveInBackground(_ url: URL, saver: MediaSaver) {
+        let task = BackgroundTask()
+        Task {
+            await saver.saveVideo(at: url)
+            task.end()
+        }
+    }
+
     /// 画面が見えていないあいだは、映像の表示を止める（音は聞き続ける）。
     func setVideoPaused(_ paused: Bool) {
         engine.setVideoPaused(paused)
+    }
+}
+
+/// `UIApplication.beginBackgroundTask` で確保した時間。`end()` か時間切れで 1 回だけ返す。
+@MainActor
+private final class BackgroundTask {
+    private var identifier = UIBackgroundTaskIdentifier.invalid
+
+    init() {
+        identifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideo") { [weak self] in
+            MainActor.assumeIsolated { self?.end() }
+        }
+    }
+
+    func end() {
+        guard identifier != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(identifier)
+        identifier = .invalid
     }
 }

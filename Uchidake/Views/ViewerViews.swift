@@ -89,7 +89,7 @@ struct ViewerListView: View {
 
     private func open(_ camera: CameraFinder.FoundCamera) {
         guard let key = model.key else { return }
-        session = ViewerSession(camera: camera, key: key)
+        session = ViewerSession(camera: camera, key: key, saver: model.saver)
     }
 }
 

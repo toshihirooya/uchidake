@@ -18,6 +18,9 @@ final class ViewerEngine {
         var status: CameraStatus?
         var videoFrames = 0
         var audioPackets = 0
+        var isRecording = false
+        /// 写真にできるコマを覚えているか
+        var canTakePhoto = false
     }
 
     /// これだけ待ってもつながらなければ、やり直す
@@ -33,6 +36,8 @@ final class ViewerEngine {
     private let layer: AVSampleBufferDisplayLayer
     private let queue = DispatchQueue(label: "uchidake.viewer")
     private let audio = AudioPipe()
+    /// 写真の復元は時間がかかるので、`queue` を止めないよう別のキューで行う
+    private let stillQueue = DispatchQueue(label: "uchidake.viewer.still")
 
     // 以下は queue の上だけで触る
     private var connection: NWConnection?
@@ -49,6 +54,21 @@ final class ViewerEngine {
     private var isTalking = false
     private var isVideoPaused = false
     private var isStopped = false
+    /// 表示に回せた、最後のキーフレームからのコマ（写真用）
+    private var gop = GopBuffer()
+    /// 録画中の書き手と、その知らせ先。録画していなければ nil
+    private var recording: Recording?
+
+    private struct Recording {
+        let recorder: StreamRecorder
+        let directory: URL
+        let onStop: (Bool) -> Void
+    }
+
+    #if DEBUG
+    /// テスト用: 送ろうとしたパケットを覗く（つながっていなくても呼ばれる）
+    var sentForTesting: ((Data) -> Void)?
+    #endif
 
     init(endpoint: NWEndpoint, key: Data, layer: AVSampleBufferDisplayLayer) {
         self.endpoint = endpoint
@@ -78,6 +98,8 @@ final class ViewerEngine {
 
     func stop() {
         queue.async {
+            // 録画は先に止める。閉じ終えた知らせは、接続が無くても届く
+            self.endRecording(lowStorage: false)
             self.isStopped = true
             self.timer?.cancel()
             self.timer = nil
@@ -124,11 +146,93 @@ final class ViewerEngine {
             self.isVideoPaused = paused
             if !paused {
                 self.assembler = VideoAssembler()
+                self.resetGop()
                 self.layer.sampleBufferRenderer.flush()
                 self.requestKeyframe(force: true)
             }
         }
     }
+
+    // MARK: - 写真と録画
+
+    /// 覚えているコマから 1 枚を JPEG にする。`queue` の外（復元用のキュー）で復元し、結果を `completion` に渡す。
+    func capturePhoto(completion: @escaping (Data?) -> Void) {
+        queue.async { [stillQueue] in
+            let frames = self.gop.frames
+            stillQueue.async {
+                // 表示の層が映像を受けているとき、その処理で最初に作る復元器はキーフレームを
+                // 「壊れている」（-8969）と返すことがある（シミュレータで確かめた）。すぐやり直せば通るので、1 回だけやり直す
+                let image = StillDecoder.lastImage(from: frames) ?? StillDecoder.lastImage(from: frames)
+                let jpeg = image.flatMap(StillDecoder.jpegData(from:))
+                completion(jpeg)
+            }
+        }
+    }
+
+    /// 録画を始める。カメラにキーフレームを頼む。すでに録画中なら何もしない。
+    /// `onFile` は書き終えたファイルごとに、`onStop` は録画が止まったときに 1 回（自分で止めた・失敗した・容量が減った、のどれでも）呼ばれる。
+    func startRecording(directory: URL, onFile: @escaping (URL) -> Void, onStop: @escaping (_ lowStorage: Bool) -> Void) {
+        queue.async { [weak self, queue] in
+            guard let self, self.recording == nil else { return }
+            guard !self.isStopped else {
+                // もう閉じた。始めずに、止まったことだけ知らせる
+                onStop(false)
+                return
+            }
+            let recorder = StreamRecorder(directory: directory)
+            // 書き手の知らせは書き手のキューから来るので、queue に戻してから扱う
+            recorder.onFileFinished = { url in
+                queue.async { onFile(url) }
+            }
+            recorder.onFailure = { [weak self, weak recorder] in
+                queue.async {
+                    // 最初の失敗で止める。2 回目以降や、前の録画の失敗は無視する
+                    guard let self, let recorder, self.recording?.recorder === recorder else { return }
+                    self.endRecording(lowStorage: false)
+                }
+            }
+            self.recording = Recording(recorder: recorder, directory: directory, onStop: onStop)
+            self.snapshot.isRecording = true
+            self.publish()
+            self.send(MediaPacket.keepAlive(isRecording: true).encoded())
+            self.requestKeyframe(force: true)
+        }
+    }
+
+    /// 録画を止める。録画中でなければ何もしない。
+    func stopRecording() {
+        queue.async {
+            self.endRecording(lowStorage: false)
+        }
+    }
+
+    /// 録画を止めて、ファイルを閉じ始める。閉じ終えたら（`onFile` をすべて呼んだあと）`onStop` を呼ぶ。
+    private func endRecording(lowStorage: Bool) {
+        guard let recording else { return }
+        self.recording = nil
+        snapshot.isRecording = false
+        publish()
+        send(MediaPacket.keepAlive(isRecording: false).encoded())
+        let onStop = recording.onStop
+        recording.recorder.finish { [queue] in
+            queue.async { onStop(lowStorage) }
+        }
+    }
+
+    private func resetGop() {
+        gop.reset()
+        if snapshot.canTakePhoto {
+            snapshot.canTakePhoto = false
+            publish()
+        }
+    }
+
+    #if DEBUG
+    /// テスト用: 受信したことにして `handle` に流す。
+    func receiveForTesting(_ packet: MediaPacket) {
+        queue.async { self.handle(packet) }
+    }
+    #endif
 
     // MARK: - 接続
 
@@ -145,7 +249,7 @@ final class ViewerEngine {
                 // DTLS のハンドシェイクが通った。カメラに「見ている」と知らせて受信を始める。
                 self.isConnectionReady = true
                 self.lastHeard = Date()
-                self.send(MediaPacket.keepAlive(isRecording: false).encoded())
+                self.send(MediaPacket.keepAlive(isRecording: self.snapshot.isRecording).encoded())
                 self.receive(on: connection)
             case .failed:
                 self.reconnectSoon()
@@ -163,6 +267,7 @@ final class ViewerEngine {
         isConnectionReady = false
         assembler = VideoAssembler()
         format = nil
+        resetGop()
     }
 
     private func reconnectSoon() {
@@ -180,8 +285,12 @@ final class ViewerEngine {
     private func tick() {
         guard !isStopped else { return }
         let now = Date()
+        // 空きが少なくなったら、書き込みに失敗する前に止める（失敗するとそこまでの録画が再生できない）
+        if let recording, let free = MediaSaver.freeBytes(at: recording.directory), free < MediaSaver.minimumFreeBytes {
+            endRecording(lowStorage: true)
+        }
         if isConnectionReady {
-            send(MediaPacket.keepAlive(isRecording: false).encoded())
+            send(MediaPacket.keepAlive(isRecording: snapshot.isRecording).encoded())
             if now.timeIntervalSince(lastHeard) > Self.silenceTimeout {
                 // カメラが止まった、または離れた
                 reconnectSoon()
@@ -201,6 +310,9 @@ final class ViewerEngine {
     // MARK: - 送信
 
     private func send(_ packet: Data) {
+        #if DEBUG
+        sentForTesting?(packet)
+        #endif
         guard isConnectionReady else { return }
         connection?.send(content: packet, completion: .idempotent)
     }
@@ -252,6 +364,8 @@ final class ViewerEngine {
             }
         case .audio(_, let pcm):
             snapshot.audioPackets += 1
+            // スピーカーを消していても、録画には入れる
+            recording?.recorder.appendAudio(pcm, at: CMClockGetTime(CMClockGetHostTimeClock()))
             audio.play(pcm)
         case .status(let status):
             snapshot.status = status
@@ -275,6 +389,13 @@ final class ViewerEngine {
             return
         }
         renderer.enqueue(sampleBuffer)
+        // 表示に回せたコマだけを、写真と録画に使う（見えているものと同じになる）
+        gop.append(frame)
+        recording?.recorder.appendVideo(frame, at: CMClockGetTime(CMClockGetHostTimeClock()))
+        if snapshot.canTakePhoto == gop.isEmpty {
+            snapshot.canTakePhoto = !gop.isEmpty
+            publish()
+        }
         snapshot.videoFrames += 1
         // コマ数は検証用の表示にしか使わないので、ときどきだけ知らせる
         if snapshot.videoFrames == 1 || snapshot.videoFrames % 15 == 0 {

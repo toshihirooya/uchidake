@@ -414,8 +414,144 @@ final class MediaSaverTests: XCTestCase {
         XCTAssertEqual(saver.notice, .photoFailed)
     }
 
+    // .onAppear はもう一度来ることがある。2 回目に録画中の *.partial.mp4 を消してはいけない
+    func testRecoveryRunsOnlyOncePerSaver() async {
+        let library = FakeLibrary(), saver = MediaSaver(library: library, directory: directory)
+        await saver.recoverLeftovers()
+        let recording = file("recording-c.partial.mp4")
+        await saver.recoverLeftovers()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: recording.path))
+    }
+
     func testFreeBytesIsReadableForExistingDirectory() {
         XCTAssertNotNil(MediaSaver.freeBytes(at: directory))
         XCTAssertTrue(MediaSaver(library: FakeLibrary(), directory: directory).ensureStorage())
+    }
+}
+
+// MARK: - 見る側のエンジン
+
+final class ViewerEngineRecordingTests: XCTestCase {
+    private var directory: URL!
+    private var engine: ViewerEngine!
+    private var nextFrameID: UInt32 = 0
+
+    override func setUpWithError() throws {
+        directory = FileManager.default.temporaryDirectory.appendingPathComponent("ViewerEngineRecordingTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        // つながらない宛先で作り、start() しない。受信はテストから流し込む
+        engine = ViewerEngine(endpoint: .hostPort(host: "127.0.0.1", port: 9), key: Data(count: 32), layer: AVSampleBufferDisplayLayer())
+    }
+
+    override func tearDownWithError() throws {
+        engine = nil
+        try? FileManager.default.removeItem(at: directory)
+    }
+
+    /// 各コマを送るときと同じ形に分けて、受信として流す
+    private func feed(_ frames: [Data]) {
+        for frame in frames {
+            for data in MediaPacket.videoPackets(frame: frame, frameID: nextFrameID) {
+                engine.receiveForTesting(MediaPacket(data)!)
+            }
+            nextFrameID += 1
+        }
+    }
+
+    private func capturePhoto() -> Data? {
+        let done = expectation(description: "capturePhoto が返った")
+        var result: Data?
+        engine.capturePhoto { jpeg in
+            result = jpeg
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 10)
+        return result
+    }
+
+    func testPhotoComesFromBufferedFrames() throws {
+        let canTakePhoto = expectation(description: "canTakePhoto が true になった")
+        canTakePhoto.assertForOverFulfill = false
+        engine.onChange = { snapshot in
+            if snapshot.canTakePhoto { canTakePhoto.fulfill() }
+        }
+        feed(makeFrames(count: 5))
+        wait(for: [canTakePhoto], timeout: 10)
+        let jpeg = try XCTUnwrap(capturePhoto())
+        XCTAssertEqual(jpeg.prefix(2), Data([0xFF, 0xD8]))
+    }
+
+    func testNoPhotoBeforeAnyFrame() {
+        XCTAssertNil(capturePhoto())
+    }
+
+    func testRecordingProducesOneFileAndStopsOnce() {
+        let lock = NSLock()
+        var sent: [Data] = []
+        engine.sentForTesting = { data in lock.withLock { sent.append(data) } }
+        var files: [URL] = []
+        let fileFinished = expectation(description: "onFile")
+        fileFinished.assertForOverFulfill = true
+        let stopped = expectation(description: "onStop")
+        stopped.assertForOverFulfill = true
+        engine.startRecording(directory: directory, onFile: { url in
+            files.append(url)
+            fileFinished.fulfill()
+        }, onStop: { lowStorage in
+            XCTAssertFalse(lowStorage)
+            stopped.fulfill()
+        })
+        feed(makeFrames(count: 30))
+        engine.stopRecording()
+        wait(for: [fileFinished, stopped], timeout: 10, enforceOrder: true)
+
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.pathExtension, "mp4")
+        XCTAssertTrue(files.allSatisfy { FileManager.default.fileExists(atPath: $0.path) })
+        // 録画の開始と終了の瞬間に、生存通知で知らせる。開始ではキーフレームも頼む
+        let packets = lock.withLock { sent }.compactMap(MediaPacket.init)
+        XCTAssertEqual(packets.filter { if case .keepAlive = $0 { true } else { false } },
+                       [.keepAlive(isRecording: true), .keepAlive(isRecording: false)])
+        XCTAssertTrue(packets.contains(.keyframeRequest))
+    }
+
+    // Review Focus 5
+    func testStartingTwiceAndStoppingTwiceStillProducesOneFile() {
+        let fileFinished = expectation(description: "onFile")
+        fileFinished.assertForOverFulfill = true
+        let stopped = expectation(description: "onStop")
+        stopped.assertForOverFulfill = true
+        let start = {
+            self.engine.startRecording(directory: self.directory, onFile: { _ in fileFinished.fulfill() },
+                                       onStop: { _ in stopped.fulfill() })
+        }
+        start()
+        start()
+        feed(makeFrames(count: 30))
+        engine.stopRecording()
+        engine.stopRecording()
+        wait(for: [fileFinished, stopped], timeout: 10)
+        // 遅れて 2 本目や 2 回目の onStop が来ないことを、少し待って確かめる
+        let extra = expectation(description: "余分な呼び出しが無い")
+        extra.isInverted = true
+        wait(for: [extra], timeout: 1)
+        let files = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
+        XCTAssertEqual(files.count, 1)
+    }
+
+    // Review Focus 2
+    func testStoppingBeforeAnyKeyframeProducesNoFile() {
+        let fileFinished = expectation(description: "onFile が呼ばれない")
+        fileFinished.isInverted = true
+        let stopped = expectation(description: "onStop")
+        stopped.assertForOverFulfill = true
+        engine.startRecording(directory: directory, onFile: { _ in fileFinished.fulfill() }, onStop: { lowStorage in
+            XCTAssertFalse(lowStorage)
+            stopped.fulfill()
+        })
+        engine.stopRecording()
+        wait(for: [stopped], timeout: 10)
+        wait(for: [fileFinished], timeout: 1)
+        XCTAssertTrue(((try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []).isEmpty)
     }
 }
