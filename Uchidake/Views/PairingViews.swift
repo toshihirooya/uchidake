@@ -211,66 +211,90 @@ struct PairingScanView: View {
     @State private var access: Access = .asking
     @State private var message: String?
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     var body: some View {
         ZStack {
             Theme.background.ignoresSafeArea()
-            VStack(spacing: 16) {
-                Text("QR コードを読み取る")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                Text("設定済みの端末で「端末を追加」を押し、表示された QR コードを枠に入れてください。")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20).fill(.black)
-                    switch access {
-                    case .asking:
-                        ProgressView()
-                    case .allowed:
-                        QRScannerView { code in
-                            handle(code)
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                    case .denied:
-                        VStack(spacing: 12) {
-                            Text("カメラを使う許可がありません。設定アプリで、うちだけカメラにカメラの使用を許可してください。")
-                                .font(.footnote)
-                                .multilineTextAlignment(.center)
-                            Button("設定を開く") {
-                                if let url = URL(string: UIApplication.openSettingsURLString) {
-                                    openURL(url)
-                                }
-                            }
-                            .tint(Theme.accent)
-                        }
-                        .padding()
-                    case .noCamera:
-                        Text("この端末ではカメラを使えません。")
-                            .font(.footnote)
-                            .padding()
+            if verticalSizeClass == .compact {
+                // iPhone の横向き。高さが足りないので、説明と映像を横に並べる
+                HStack(spacing: 24) {
+                    VStack(spacing: 16) {
+                        explanation
+                        footer
                     }
+                    .frame(maxWidth: 320)
+                    preview
                 }
-                .aspectRatio(1, contentMode: .fit)
-                .frame(maxWidth: 360)
-
-                if let message {
-                    Text(message)
-                        .font(.footnote)
-                        .foregroundStyle(Theme.warning)
-                        .multilineTextAlignment(.center)
+                .padding(24)
+            } else {
+                VStack(spacing: 16) {
+                    explanation
+                    preview
+                        .frame(maxWidth: 360)
+                    footer
                 }
-
-                Button("やめる") { dismiss() }
-                    .tint(.secondary)
+                .frame(maxWidth: 440)
+                .padding(24)
             }
-            .frame(maxWidth: 440)
-            .padding(24)
         }
         .preferredColorScheme(.dark)
         .task {
             await requestAccess()
         }
+    }
+
+    @ViewBuilder private var explanation: some View {
+        Text("QR コードを読み取る")
+            .font(.system(size: 28, weight: .bold, design: .rounded))
+        Text("設定済みの端末で「端末を追加」を押し、表示された QR コードを枠に入れてください。")
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+    }
+
+    @ViewBuilder private var footer: some View {
+        if let message {
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(Theme.warning)
+                .multilineTextAlignment(.center)
+        }
+        Button("やめる") { dismiss() }
+            .tint(.secondary)
+    }
+
+    private var preview: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20).fill(.black)
+            switch access {
+            case .asking:
+                ProgressView()
+            case .allowed:
+                QRScannerView { code in
+                    handle(code)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+            case .denied:
+                VStack(spacing: 12) {
+                    Text("カメラを使う許可がありません。設定アプリで、うちだけカメラにカメラの使用を許可してください。")
+                        .font(.footnote)
+                        .multilineTextAlignment(.center)
+                    Button("設定を開く") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
+                    }
+                    .tint(Theme.accent)
+                }
+                .padding()
+            case .noCamera:
+                Text("この端末ではカメラを使えません。")
+                    .font(.footnote)
+                    .padding()
+            }
+        }
+        .aspectRatio(1, contentMode: .fit)
     }
 
     private func requestAccess() async {
@@ -328,23 +352,6 @@ struct QRScannerView: UIViewRepresentable {
     final class PreviewView: UIView {
         override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
         var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
-
-        override func layoutSubviews() {
-            super.layoutSubviews()
-            // 端末の向きに合わせて、映像が正しい向きで見えるようにする
-            guard let connection = previewLayer.connection,
-                  let orientation = window?.windowScene?.interfaceOrientation else { return }
-            let angle: CGFloat
-            switch orientation {
-            case .landscapeRight: angle = 0
-            case .landscapeLeft: angle = 180
-            case .portraitUpsideDown: angle = 270
-            default: angle = 90
-            }
-            if connection.isVideoRotationAngleSupported(angle) {
-                connection.videoRotationAngle = angle
-            }
-        }
     }
 
     final class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
@@ -353,6 +360,9 @@ struct QRScannerView: UIViewRepresentable {
         private let queue = DispatchQueue(label: "uchidake.qrscan")
         /// 同じコードを続けて何度も渡さないための控え（メインスレッド上だけで触る）
         private var lastCode: String?
+        // 端末の向きに合わせて映像を回すためのもの（メインスレッド上だけで触る）
+        private var rotation: AVCaptureDevice.RotationCoordinator?
+        private var rotationObservation: NSKeyValueObservation?
 
         init(onRead: @escaping (String) -> Void) {
             self.onRead = onRead
@@ -376,13 +386,34 @@ struct QRScannerView: UIViewRepresentable {
                 }
                 session.commitConfiguration()
                 session.startRunning()
+                DispatchQueue.main.async { [weak self, weak view] in
+                    guard let self, let view else { return }
+                    self.followRotation(of: device, in: view.previewLayer)
+                }
+            }
+        }
+
+        /// 端末を縦にしても横にしても、映像が見たままの向きで映るようにする。
+        private func followRotation(of device: AVCaptureDevice, in previewLayer: AVCaptureVideoPreviewLayer) {
+            let rotation = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: previewLayer)
+            self.rotation = rotation
+            let apply = { [weak previewLayer] (angle: CGFloat) in
+                guard let connection = previewLayer?.connection,
+                      connection.isVideoRotationAngleSupported(angle) else { return }
+                connection.videoRotationAngle = angle
+            }
+            apply(rotation.videoRotationAngleForHorizonLevelPreview)
+            rotationObservation = rotation.observe(\.videoRotationAngleForHorizonLevelPreview, options: [.new]) { _, change in
+                guard let angle = change.newValue else { return }
                 DispatchQueue.main.async {
-                    view.setNeedsLayout()
+                    apply(angle)
                 }
             }
         }
 
         func stop() {
+            rotationObservation = nil
+            rotation = nil
             queue.async { [session] in
                 session.stopRunning()
             }
