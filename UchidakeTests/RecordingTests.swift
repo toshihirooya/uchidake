@@ -323,3 +323,99 @@ final class StreamRecorderTests: XCTestCase {
         XCTAssertTrue(files.allSatisfy { !$0.contains(".partial") })
     }
 }
+
+// MARK: - MediaSaver
+
+/// 「写真」の偽物。許可の有無・失敗させるか・受け取ったものを持つ。
+private final class FakeLibrary: PhotoLibrary {
+    var permitted = true
+    var fails = false
+    private(set) var photos: [Data] = []
+    private(set) var videos: [URL] = []
+
+    struct Failure: Error {}
+
+    func requestAddPermission() async -> Bool { permitted }
+    var hasAddPermission: Bool { permitted }
+
+    func addPhoto(_ jpeg: Data) async throws {
+        if fails { throw Failure() }
+        photos.append(jpeg)
+    }
+
+    func addVideo(at url: URL) async throws {
+        if fails { throw Failure() }
+        videos.append(url)
+    }
+}
+
+@MainActor
+final class MediaSaverTests: XCTestCase {
+    private var directory: URL!
+
+    override func setUpWithError() throws {
+        directory = FileManager.default.temporaryDirectory.appendingPathComponent("MediaSaverTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        try? FileManager.default.removeItem(at: directory)
+    }
+
+    private func file(_ name: String) -> URL {
+        let url = directory.appendingPathComponent(name)
+        FileManager.default.createFile(atPath: url.path, contents: Data([0]))
+        return url
+    }
+
+    func testSavedVideoIsRemovedFromDisk() async {
+        let library = FakeLibrary(), saver = MediaSaver(library: library, directory: directory)
+        let url = file("recording-a.mp4")
+        await saver.saveVideo(at: url)
+        XCTAssertEqual(library.videos, [url]); XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+        XCTAssertEqual(saver.notice, .videoSaved); XCTAssertEqual(saver.pendingVideos, 0)
+    }
+
+    func testFailedVideoStaysOnDiskAndIsRetriedAtNextLaunch() async {
+        let library = FakeLibrary(); library.fails = true
+        let url = file("recording-a.mp4")
+        let saver = MediaSaver(library: library, directory: directory)
+        await saver.saveVideo(at: url)
+        XCTAssertEqual(saver.notice, .videoFailed)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+        library.fails = false
+        let next = MediaSaver(library: library, directory: directory)
+        await next.recoverLeftovers()
+        XCTAssertEqual(library.videos, [url]); XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    func testRecoveryDeletesUnfinishedFiles() async {
+        let library = FakeLibrary(), partial = file("recording-b.partial.mp4")
+        await MediaSaver(library: library, directory: directory).recoverLeftovers()
+        XCTAssertTrue(library.videos.isEmpty); XCTAssertFalse(FileManager.default.fileExists(atPath: partial.path))
+    }
+
+    func testDeniedPermissionSavesNothingAndSaysSo() async {
+        let library = FakeLibrary(); library.permitted = false
+        let saver = MediaSaver(library: library, directory: directory)
+        let allowed = await saver.ensurePermission()
+        XCTAssertFalse(allowed); XCTAssertEqual(saver.notice, .permissionDenied)
+        let url = file("recording-a.mp4")
+        await saver.recoverLeftovers()
+        XCTAssertTrue(library.videos.isEmpty); XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    func testPhotoSaveReportsResult() async {
+        let library = FakeLibrary(), saver = MediaSaver(library: library, directory: directory)
+        await saver.savePhoto(Data([0xFF, 0xD8]))
+        XCTAssertEqual(library.photos.count, 1); XCTAssertEqual(saver.notice, .photoSaved)
+        library.fails = true
+        await saver.savePhoto(Data([0xFF, 0xD8]))
+        XCTAssertEqual(saver.notice, .photoFailed)
+    }
+
+    func testFreeBytesIsReadableForExistingDirectory() {
+        XCTAssertNotNil(MediaSaver.freeBytes(at: directory))
+        XCTAssertTrue(MediaSaver(library: FakeLibrary(), directory: directory).ensureStorage())
+    }
+}

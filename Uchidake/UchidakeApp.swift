@@ -15,6 +15,7 @@ struct UchidakeApp: App {
                     model.applyDebugLaunchOptions()
                     #endif
                     model.resumeLastRole()
+                    Task { await model.saver.recoverLeftovers() }
                 }
         }
     }
@@ -34,6 +35,9 @@ final class AppModel {
     static let cameraNameKey = "cameraName"
     /// 名前を付けなかったときのカメラ名。Bonjour で相手に見える名前なので、付けた端末の言語で決まる。
     static let defaultCameraName = String(localized: "カメラ")
+
+    /// 写真と動画を「写真」に入れる。見る画面より長く生きるので、アプリ全体で 1 つ持つ。
+    let saver = MediaSaver()
 
     private(set) var mode: Mode = .home
     /// 端末どうしで共有する鍵。未設定なら nil。
