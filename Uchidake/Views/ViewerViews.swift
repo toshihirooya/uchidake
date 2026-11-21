@@ -103,8 +103,6 @@ struct LiveView: View {
     let onClose: () -> Void
     @Environment(\.scenePhase) private var scenePhase
     @Environment(AppModel.self) private var model
-    /// 写真を撮ったときに画面を白く光らせる濃さ
-    @State private var flash = 0.0
 
     var body: some View {
         @Bindable var session = session
@@ -136,16 +134,17 @@ struct LiveView: View {
             }
             .padding()
 
+            // 写真を撮ったら、画面を白くしてから 0.15 秒で消す。
+            // 同じ更新の中で 1 にして 0 に戻すと変化が無かったことになるので、キーフレームで動かす
             Color.white
                 .ignoresSafeArea()
-                .opacity(flash)
                 .allowsHitTesting(false)
-        }
-        .onChange(of: session.photoFlashes) {
-            flash = 1
-            withAnimation(.easeOut(duration: 0.15)) {
-                flash = 0
-            }
+                .keyframeAnimator(initialValue: 0.0, trigger: session.photoFlashes) { view, opacity in
+                    view.opacity(opacity)
+                } keyframes: { _ in
+                    MoveKeyframe(1.0)
+                    LinearKeyframe(0.0, duration: 0.15, timingCurve: .easeOut)
+                }
         }
         .task {
             #if DEBUG
