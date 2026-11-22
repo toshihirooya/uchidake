@@ -9,6 +9,27 @@ struct CameraStatus: Codable, Equatable {
     /// いま見ている端末の数
     var viewers: Int
     var usesFrontCamera: Bool
+    /// 録画中の見る側の数。古い版の通知には無いので、無ければ 0。
+    var recorders: Int = 0
+
+    init(name: String, battery: Int?, isCharging: Bool, viewers: Int, usesFrontCamera: Bool, recorders: Int = 0) {
+        self.name = name
+        self.battery = battery
+        self.isCharging = isCharging
+        self.viewers = viewers
+        self.usesFrontCamera = usesFrontCamera
+        self.recorders = recorders
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        battery = try container.decodeIfPresent(Int.self, forKey: .battery)
+        isCharging = try container.decode(Bool.self, forKey: .isCharging)
+        viewers = try container.decode(Int.self, forKey: .viewers)
+        usesFrontCamera = try container.decode(Bool.self, forKey: .usesFrontCamera)
+        recorders = try container.decodeIfPresent(Int.self, forKey: .recorders) ?? 0
+    }
 
     /// 電池が少なく、充電もされていない
     var needsCharging: Bool {
@@ -28,7 +49,8 @@ enum MediaPacket: Equatable {
     case video(frameID: UInt32, index: Int, count: Int, payload: Data)
     case audio(sequence: UInt32, pcm: Data)
     case keyframeRequest
-    case keepAlive
+    /// 見る側の生存通知。フラグのビット 0 が「録画中」。
+    case keepAlive(isRecording: Bool)
     case status(CameraStatus)
     case command(CameraCommand, sequence: UInt32)
 
@@ -66,8 +88,8 @@ enum MediaPacket: Equatable {
             return data
         case .keyframeRequest:
             return Data([Kind.keyframeRequest.rawValue])
-        case .keepAlive:
-            return Data([Kind.keepAlive.rawValue])
+        case .keepAlive(let isRecording):
+            return Data([Kind.keepAlive.rawValue, isRecording ? 1 : 0])
         case .status(let status):
             var data = Data([Kind.status.rawValue])
             data.append((try? JSONEncoder().encode(status)) ?? Data())
@@ -98,7 +120,8 @@ enum MediaPacket: Equatable {
         case .keyframeRequest:
             self = .keyframeRequest
         case .keepAlive:
-            self = .keepAlive
+            // 古い版はフラグが無い。無ければ録画していない。ビット 0 以外は無視する。
+            self = .keepAlive(isRecording: bytes.count > 1 && bytes[1] & 1 != 0)
         case .status:
             guard let status = try? JSONDecoder().decode(CameraStatus.self, from: Data(bytes[1...])) else { return nil }
             self = .status(status)

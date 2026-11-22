@@ -9,13 +9,37 @@ final class MediaPacketTests: XCTestCase {
             .video(frameID: 0x0102_0304, index: 3, count: 7, payload: Data([9, 8, 7])),
             .audio(sequence: 42, pcm: Data([1, 2, 3, 4])),
             .keyframeRequest,
-            .keepAlive,
+            .keepAlive(isRecording: true),
             .status(status),
             .command(.switchCamera, sequence: 0xDEAD_BEEF),
         ]
         for packet in packets {
             XCTAssertEqual(MediaPacket(packet.encoded()), packet)
         }
+    }
+
+    func testKeepAliveCarriesRecordingFlag() {
+        XCTAssertEqual(MediaPacket.keepAlive(isRecording: true).encoded(), Data([4, 1]))
+        XCTAssertEqual(MediaPacket.keepAlive(isRecording: false).encoded(), Data([4, 0]))
+        XCTAssertEqual(MediaPacket(Data([4, 1])), .keepAlive(isRecording: true))
+        XCTAssertEqual(MediaPacket(Data([4, 0xFE])), .keepAlive(isRecording: false))  // ほかのビットは無視
+    }
+
+    func testOldKeepAliveWithoutFlagMeansNotRecording() {
+        XCTAssertEqual(MediaPacket(Data([4])), .keepAlive(isRecording: false))
+    }
+
+    func testStatusWithoutRecordersDecodesAsZero() throws {
+        let old = #"{"name":"リビング","battery":80,"isCharging":true,"viewers":2,"usesFrontCamera":false}"#
+        var data = Data([5]); data.append(Data(old.utf8))
+        guard case .status(let status) = MediaPacket(data) else { return XCTFail() }
+        XCTAssertEqual(status.recorders, 0)
+        XCTAssertEqual(status.viewers, 2)
+    }
+
+    func testStatusRecordersSurvivesEncodingAndDecoding() {
+        let status = CameraStatus(name: "a", battery: nil, isCharging: false, viewers: 3, usesFrontCamera: true, recorders: 2)
+        XCTAssertEqual(MediaPacket(MediaPacket.status(status).encoded()), .status(status))
     }
 
     func testVideoHeaderLayoutIsBigEndian() {

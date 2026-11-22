@@ -35,7 +35,7 @@ xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=i
 | 場所 | 中身 |
 |---|---|
 | `Uchidake/Security/` | 端末どうしで共有する鍵（QR コードで渡す）と、DTLS の設定。 |
-| `Uchidake/Media/` | パケットの形式、カメラの取り込み、H.264 の圧縮、音声。 |
+| `Uchidake/Media/` | パケットの形式、カメラの取り込み、H.264 の圧縮、音声。見る側の写真の復元と録画（MP4）、「写真」への保存。 |
 | `Uchidake/Camera/` | カメラ役。待ち受けて、見る側すべてに映像と音を送る。 |
 | `Uchidake/Viewer/` | 見る役。カメラを探してつなぎ、映像と音を受ける。 |
 | `Uchidake/Views/` | 画面。 |
@@ -53,8 +53,11 @@ xcrun simctl launch --console <カメラ役の UDID> com.example.Uchidake -autoK
 ```
 
 ```bash
+xcrun simctl privacy <見る役の UDID> grant photos-add com.example.Uchidake
 xcrun simctl launch --console <見る役の UDID> com.example.Uchidake -autoKey "$KEY" -autoRole viewer
 ```
+
+写真と録画も試すときは、見る役に `-autoPhoto YES -autoRecord 5` を足す（つながったら写真を 1 枚撮り、5 秒録画する）。`privacy` の行は、見る役の「写真」への追加を許可する。
 
 `--console` を付けると、つながったことと受信したコマ数が `[Uchidake]` で始まる行に出る。シミュレータにはカメラもマイクも無いので、テスト画像と確認音のデータが流れる。
 

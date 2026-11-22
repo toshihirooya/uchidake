@@ -2,6 +2,26 @@ import AVFoundation
 import Foundation
 import Network
 
+/// 見る側ごとの「録画中」を数える。`CameraEngine` の `queue` の上で使う。
+struct RecorderTally {
+    private var recording: Set<ObjectIdentifier> = []
+
+    var count: Int { recording.count }
+
+    /// 生存通知を受けたとき。数が変わったら true。
+    mutating func update(viewer: ObjectIdentifier, isRecording: Bool) -> Bool {
+        if isRecording {
+            return recording.insert(viewer).inserted
+        }
+        return recording.remove(viewer) != nil
+    }
+
+    /// 見る側が切れたとき。数が変わったら true。
+    mutating func remove(viewer: ObjectIdentifier) -> Bool {
+        recording.remove(viewer) != nil
+    }
+}
+
 /// カメラ側の本体。映像と音を撮り、つないできた見る側すべてに送る。
 ///
 /// 待ち受けは UDP（DTLS）で、Bonjour にカメラの名前で広告する。
@@ -11,6 +31,8 @@ import Network
 final class CameraEngine {
     struct Snapshot: Equatable {
         var viewerCount = 0
+        /// 録画している見る側の数
+        var recorderCount = 0
         var usesFrontCamera = false
         /// 待ち受けできないときの理由
         var problem: Problem?
@@ -52,6 +74,7 @@ final class CameraEngine {
     private var viewers: [Viewer] = []
     private var timer: DispatchSourceTimer?
     private var snapshot = Snapshot()
+    private var recorders = RecorderTally()
     private var nextFrameID: UInt32 = 0
     private var nextAudioSequence: UInt32 = 0
     private var battery: Int?
@@ -216,6 +239,10 @@ final class CameraEngine {
         viewers.remove(at: index)
         viewer.connection.stateUpdateHandler = nil
         viewer.connection.cancel()
+        // 録画を止めずに消えた見る側は、ここで数から外す
+        if recorders.remove(viewer: ObjectIdentifier(viewer)) {
+            snapshot.recorderCount = recorders.count
+        }
         viewersChanged()
         sendStatus()
     }
@@ -299,7 +326,8 @@ final class CameraEngine {
     private func sendStatus() {
         let status = CameraStatus(
             name: name, battery: battery, isCharging: isCharging,
-            viewers: snapshot.viewerCount, usesFrontCamera: snapshot.usesFrontCamera)
+            viewers: snapshot.viewerCount, usesFrontCamera: snapshot.usesFrontCamera,
+            recorders: snapshot.recorderCount)
         sendToAll(MediaPacket.status(status).encoded())
     }
 
@@ -320,8 +348,12 @@ final class CameraEngine {
 
     private func handle(_ packet: MediaPacket, from viewer: Viewer) {
         switch packet {
-        case .keepAlive:
-            break
+        case .keepAlive(let isRecording):
+            if recorders.update(viewer: ObjectIdentifier(viewer), isRecording: isRecording) {
+                snapshot.recorderCount = recorders.count
+                publish()
+                sendStatus()  // 2 秒待たせず知らせる
+            }
         case .keyframeRequest:
             encoder.requestKeyframe()
         case .audio(_, let pcm):

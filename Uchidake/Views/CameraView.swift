@@ -77,6 +77,11 @@ struct CameraView: View {
                 }
             }
             .font(.subheadline)
+            if station.recorderCount > 0 {
+                Text("見ている端末が録画しています")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.recording)
+            }
         }
         .accessibilityElement(children: .combine)
     }

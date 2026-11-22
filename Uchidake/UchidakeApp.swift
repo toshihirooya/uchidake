@@ -15,6 +15,7 @@ struct UchidakeApp: App {
                     model.applyDebugLaunchOptions()
                     #endif
                     model.resumeLastRole()
+                    Task { await model.saver.recoverLeftovers() }
                 }
         }
     }
@@ -35,11 +36,18 @@ final class AppModel {
     /// 名前を付けなかったときのカメラ名。Bonjour で相手に見える名前なので、付けた端末の言語で決まる。
     static let defaultCameraName = String(localized: "カメラ")
 
+    /// 写真と動画を「写真」に入れる。見る画面より長く生きるので、アプリ全体で 1 つ持つ。
+    let saver = MediaSaver()
+
     private(set) var mode: Mode = .home
     /// 端末どうしで共有する鍵。未設定なら nil。
     private(set) var key: Data? = PairingKey.load()
     /// 検証用: 見る側で、最初に見つかったカメラを自動で開く
     private(set) var opensFirstCamera = false
+    /// 検証用: 最初に開いたカメラで、写真を 1 枚撮る
+    private(set) var autoPhoto = false
+    /// 検証用: 最初に開いたカメラで、この秒数だけ録画する
+    private(set) var autoRecordSeconds: Double?
 
     @ObservationIgnored private var didResume = false
 
@@ -131,6 +139,10 @@ final class AppModel {
         let defaults = UserDefaults.standard
         let autoKey = defaults.string(forKey: "autoKey").flatMap(PairingKey.key(base64URL:))
         let role = defaults.string(forKey: "autoRole")
+        autoPhoto = defaults.bool(forKey: "autoPhoto")
+        if let seconds = defaults.string(forKey: "autoRecord").flatMap(Double.init), seconds > 0 {
+            autoRecordSeconds = seconds
+        }
         guard autoKey != nil || role != nil else { return }
         didResume = true
         Task {
@@ -147,6 +159,15 @@ final class AppModel {
                 break
             }
         }
+    }
+
+    /// `-autoPhoto` と `-autoRecord` を 1 回だけ渡す（2 台目以降に開いたカメラでは何もしない）。
+    func takeDebugCaptureOptions() -> (photo: Bool, recordSeconds: Double?) {
+        defer {
+            autoPhoto = false
+            autoRecordSeconds = nil
+        }
+        return (autoPhoto, autoRecordSeconds)
     }
     #endif
 }
