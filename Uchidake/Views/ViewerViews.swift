@@ -252,7 +252,19 @@ struct LiveView: View {
                 .tint(.white)
             Text("カメラにつないでいます…")
                 .font(.headline)
-            if session.failedAttempts > 0 {
+            if let refusal = session.refusal {
+                Group {
+                    switch refusal {
+                    case .freeLimit:
+                        Text("このカメラは、いま別の端末が見ています。カメラの端末を家族プランにすると、同時に 4 台まで見られます。")
+                    case .familyLimit:
+                        Text("このカメラは、いま 4 台が見ています。")
+                    }
+                }
+                .font(.footnote)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(Theme.warning)
+            } else if session.failedAttempts > 0 {
                 Text("つながりません。この端末をカメラと同じ QR コードで設定したか、カメラの端末でアプリが開いているかを確かめてください。")
                     .font(.footnote)
                     .multilineTextAlignment(.center)

@@ -73,6 +73,8 @@ final class ViewerSession: Identifiable {
     /// つなごうとして時間切れになった回数。鍵が違うと増え続ける。
     private(set) var failedAttempts = 0
     private(set) var status: CameraStatus?
+    /// カメラに上限で断られているあいだの理由
+    private(set) var refusal: RefusalReason?
     private(set) var videoFrames = 0
     private(set) var audioPackets = 0
     private(set) var isTalking = false
@@ -117,10 +119,14 @@ final class ViewerSession: Identifiable {
                               live ? 1 : 0, snapshot.videoFrames, snapshot.audioPackets, snapshot.failedAttempts,
                               snapshot.status?.viewers ?? -1, snapshot.status?.usesFrontCamera == true ? 1 : 0)
                     }
+                    if snapshot.refusal != self.refusal {
+                        NSLog("[Uchidake] viewer refused=%d", Int(snapshot.refusal?.rawValue ?? 0))
+                    }
                     #endif
                     self.isLive = snapshot.phase == .live
                     self.failedAttempts = snapshot.failedAttempts
                     self.status = snapshot.status
+                    self.refusal = snapshot.refusal
                     self.videoFrames = snapshot.videoFrames
                     self.audioPackets = snapshot.audioPackets
                     self.canTakePhoto = snapshot.canTakePhoto

@@ -21,7 +21,13 @@ final class ViewerEngine {
         var isRecording = false
         /// 写真にできるコマを覚えているか
         var canTakePhoto = false
+        /// カメラに上限で断られているあいだの理由。映像や状態が届いたら nil に戻る。
+        var refusal: RefusalReason?
     }
+
+    /// この端末の ID。つなぎ直したとき、カメラが同じ端末だと分かるように生存通知に付ける。
+    /// アプリを起動するたびに作り直す。
+    static let viewerID = UInt64.random(in: 1...UInt64.max)
 
     /// これだけ待ってもつながらなければ、やり直す
     private static let connectTimeout: TimeInterval = 8
@@ -198,7 +204,7 @@ final class ViewerEngine {
             self.recording = Recording(recorder: recorder, directory: directory, onStop: onStop)
             self.snapshot.isRecording = true
             self.publish()
-            self.send(MediaPacket.keepAlive(isRecording: true).encoded())
+            self.send(MediaPacket.keepAlive(isRecording: true, viewerID: Self.viewerID).encoded())
             self.requestKeyframe(force: true)
         }
     }
@@ -216,7 +222,7 @@ final class ViewerEngine {
         self.recording = nil
         snapshot.isRecording = false
         publish()
-        send(MediaPacket.keepAlive(isRecording: false).encoded())
+        send(MediaPacket.keepAlive(isRecording: false, viewerID: Self.viewerID).encoded())
         let onStop = recording.onStop
         recording.recorder.finish { [queue] in
             queue.async { onStop(lowStorage) }
@@ -258,7 +264,7 @@ final class ViewerEngine {
                 // DTLS のハンドシェイクが通った。カメラに「見ている」と知らせて受信を始める。
                 self.isConnectionReady = true
                 self.lastHeard = Date()
-                self.send(MediaPacket.keepAlive(isRecording: self.snapshot.isRecording).encoded())
+                self.send(MediaPacket.keepAlive(isRecording: self.snapshot.isRecording, viewerID: Self.viewerID).encoded())
                 self.receive(on: connection)
             case .failed:
                 self.reconnectSoon()
@@ -279,13 +285,13 @@ final class ViewerEngine {
         resetGop()
     }
 
-    private func reconnectSoon() {
+    private func reconnectSoon(after delay: TimeInterval = 1) {
         dropConnection()
         if snapshot.phase != .connecting {
             snapshot.phase = .connecting
             publish()
         }
-        queue.asyncAfter(deadline: .now() + 1) { [weak self] in
+        queue.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self, self.connection == nil else { return }
             self.connect()
         }
@@ -299,7 +305,7 @@ final class ViewerEngine {
             endRecording(lowStorage: true)
         }
         if isConnectionReady {
-            send(MediaPacket.keepAlive(isRecording: snapshot.isRecording).encoded())
+            send(MediaPacket.keepAlive(isRecording: snapshot.isRecording, viewerID: Self.viewerID).encoded())
             if now.timeIntervalSince(lastHeard) > Self.silenceTimeout {
                 // カメラが止まった、または離れた
                 reconnectSoon()
@@ -355,9 +361,19 @@ final class ViewerEngine {
 
     private func handle(_ packet: MediaPacket) {
         lastHeard = Date()
-        if snapshot.phase != .live {
+        if case .refusal(let reason) = packet {
+            // 上限で断られた。理由を出して、枠が空くのを待ちながらつなぎ直す。
+            guard snapshot.refusal != reason || snapshot.phase != .connecting else { return }
+            snapshot.refusal = reason
+            snapshot.phase = .connecting
+            publish()
+            reconnectSoon(after: 3)
+            return
+        }
+        if snapshot.phase != .live || snapshot.refusal != nil {
             snapshot.phase = .live
             snapshot.failedAttempts = 0
+            snapshot.refusal = nil
             publish()
         }
         switch packet {
@@ -379,8 +395,8 @@ final class ViewerEngine {
         case .status(let status):
             snapshot.status = status
             publish()
-        case .keyframeRequest, .keepAlive, .command:
-            break  // 見る側が送るパケット
+        case .keyframeRequest, .keepAlive, .command, .refusal:
+            break  // 見る側が送るパケット（断りは上で受けた）
         }
     }
 

@@ -1,0 +1,100 @@
+{
+  "identifier": "7C1E5A90",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "3000",
+      "familyShareable": true,
+      "internalID": "6700000003",
+      "localizations": [
+        {
+          "description": "見る側を同時 4 台まで、カメラを複数台。",
+          "displayName": "家族プラン（買い切り）",
+          "locale": "ja"
+        },
+        {
+          "description": "Up to 4 viewers at once, and more than one camera.",
+          "displayName": "Family Plan (Lifetime)",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.toshihirooya.uchidake.family.lifetime",
+      "referenceName": "Family Plan (Lifetime)",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_locale": "ja",
+    "_storefront": "JPN",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "21500001",
+      "localizations": [],
+      "name": "家族プラン",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "300",
+          "familyShareable": true,
+          "groupNumber": 2,
+          "internalID": "6700000001",
+          "introductoryOffer": {
+            "internalID": "6700000011",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
+          },
+          "localizations": [
+            {
+              "description": "見る側を同時 4 台まで、カメラを複数台。",
+              "displayName": "家族プラン（月額）",
+              "locale": "ja"
+            },
+            {
+              "description": "Up to 4 viewers at once, and more than one camera.",
+              "displayName": "Family Plan (Monthly)",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.toshihirooya.uchidake.family.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Family Plan (Monthly)",
+          "subscriptionGroupID": "21500001",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "1500",
+          "familyShareable": true,
+          "groupNumber": 1,
+          "internalID": "6700000002",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "見る側を同時 4 台まで、カメラを複数台。",
+              "displayName": "家族プラン（年額）",
+              "locale": "ja"
+            },
+            {
+              "description": "Up to 4 viewers at once, and more than one camera.",
+              "displayName": "Family Plan (Yearly)",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.toshihirooya.uchidake.family.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Family Plan (Yearly)",
+          "subscriptionGroupID": "21500001",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}

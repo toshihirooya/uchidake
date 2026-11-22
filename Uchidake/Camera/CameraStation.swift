@@ -6,7 +6,19 @@ import UIKit
 @MainActor
 @Observable
 final class CameraStation {
+    /// カメラを始めるまでの段階
+    enum Phase: Equatable {
+        /// 同じ組のほかのカメラがいないか確かめている
+        case checking
+        case running
+        /// カメラを使えない（許可が無い）。理由は `problem`。
+        case unavailable
+        /// 家族プランの無いカメラがすでにいるので、始められない（そのカメラの名前）
+        case blocked(by: String)
+    }
+
     let name: String
+    private(set) var phase: Phase = .checking
     private(set) var viewerCount = 0
     /// 録画している見る側の数
     private(set) var recorderCount = 0
@@ -18,24 +30,48 @@ final class CameraStation {
     @ObservationIgnored let previewLayer = AVSampleBufferDisplayLayer()
 
     @ObservationIgnored private let key: Data
+    @ObservationIgnored private let plan: FamilyPlanStore
+    /// エンジンに最後に伝えた、家族プランの有無
+    @ObservationIgnored private var toldFamilyPlan = false
+    @ObservationIgnored private var advert: CameraAdvert?
+    @ObservationIgnored private var isClosed = false
+    @ObservationIgnored private var isWatchingPlan = false
     @ObservationIgnored private var engine: CameraEngine?
     @ObservationIgnored private var batteryTask: Task<Void, Never>?
 
-    init(name: String, key: Data) {
+    typealias Found = (name: String, advert: CameraAdvert?)
+    @ObservationIgnored private let access: () async -> Bool
+    @ObservationIgnored private let survey: () async -> [Found]
+    @ObservationIgnored private let probe: (String, Data) async -> Bool
+
+    /// - Parameters:
+    ///   - access: カメラの許可を求める（テストでは差し替える）
+    ///   - survey: 周りのカメラを探す
+    ///   - probe: 広告に出ているカメラが、いま本当に動いているかを確かめる
+    init(name: String, key: Data, plan: FamilyPlanStore,
+         access: @escaping () async -> Bool = CameraStation.requestAccess,
+         survey: @escaping () async -> [Found] = { await CameraCensus.survey() },
+         probe: @escaping (String, Data) async -> Bool = { await CameraCensus.isReachable(name: $0, key: $1) }) {
         self.name = name
         self.key = key
+        self.plan = plan
+        self.access = access
+        self.survey = survey
+        self.probe = probe
         previewLayer.videoGravity = .resizeAspect
     }
 
     func start() async {
         guard engine == nil else { return }
-        guard await Self.requestAccess() else {
+        guard await access() else {
             problem = .cameraDenied
+            phase = .unavailable
             return
         }
-        guard engine == nil else { return }
+        guard engine == nil, !isClosed else { return }
 
-        let engine = CameraEngine(name: name, key: key, previewLayer: previewLayer)
+        toldFamilyPlan = plan.isActive
+        let engine = CameraEngine(name: name, key: key, previewLayer: previewLayer, hasFamilyPlan: toldFamilyPlan)
         engine.onChange = { [weak self] snapshot in
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
@@ -53,19 +89,114 @@ final class CameraStation {
             }
         }
         self.engine = engine
-        engine.start()
+        var advert = CameraAdvert(
+            familyTag: CameraAdvert.familyTag(key: key), hasPlan: toldFamilyPlan, isRunning: toldFamilyPlan,
+            since: Self.cameraSince(), deviceID: Self.deviceID())
+        self.advert = advert
+        engine.startListening(advert: advert)
+        watchPlan()
+
+        if !toldFamilyPlan {
+            // 家族プランの無いカメラは、同じ組に 1 台まで。始める前に周りを確かめる。
+            phase = .checking
+            var others = await survey()
+            guard self.engine === engine else { return }  // 確かめているあいだに止められた
+            advert = self.advert ?? advert  // 確かめているあいだに家族プランが有効になったかもしれない
+            while case .blocked(let otherName) = CameraCensus.decide(me: advert, others: others) {
+                // 広告だけ残って、もういないカメラかもしれない。つながらなければ数えない。
+                let alive = await probe(otherName, key)
+                guard self.engine === engine else { return }
+                guard alive else {
+                    others.removeAll { $0.name == otherName }
+                    continue
+                }
+                #if DEBUG
+                NSLog("[Uchidake] camera blocked by=%@", otherName)
+                #endif
+                stopEngine()
+                phase = .blocked(by: otherName)
+                return
+            }
+            advert.isRunning = true
+            self.advert = advert
+            engine.setAdvert(advert)
+        }
+        engine.startCapture()
+        phase = .running
+        #if DEBUG
+        NSLog("[Uchidake] camera running plan=%d", toldFamilyPlan ? 1 : 0)
+        #endif
 
         // 電池の状態を、見る側に知らせるために渡し続ける
         UIDevice.current.isBatteryMonitoringEnabled = true
         batteryTask = Task { [weak self] in
             while !Task.isCancelled {
                 self?.reportBattery()
+                // 月額・年額の期限は時間で切れるので、ここでも見直す
+                self?.syncPlan()
                 try? await Task.sleep(for: .seconds(20))
             }
         }
     }
 
+    /// 家族プランが変わったら（購入・復元・期限切れ）、エンジンに伝える。
+    private func watchPlan() {
+        guard !isWatchingPlan, !isClosed else { return }
+        isWatchingPlan = true
+        withObservationTracking {
+            _ = plan.isActive
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.isWatchingPlan = false
+                guard !self.isClosed else { return }
+                self.watchPlan()
+                if case .blocked = self.phase, self.plan.isActive {
+                    // 始められずにいたあいだに家族プランが有効になった。そのまま始める。
+                    await self.start()
+                } else {
+                    self.syncPlan()
+                }
+            }
+        }
+    }
+
+    private func syncPlan() {
+        let active = plan.isActive
+        guard let engine, active != toldFamilyPlan else { return }
+        toldFamilyPlan = active
+        engine.setFamilyPlan(active)
+        if var advert {
+            advert.hasPlan = active
+            self.advert = advert
+            engine.setAdvert(advert)
+        }
+    }
+
+    /// この端末を最初にカメラにした時刻。同時に始めようとしたカメラどうしで、どちらが残るかを決める。
+    private static func cameraSince() -> Int {
+        let defaults = UserDefaults.standard
+        let saved = defaults.integer(forKey: "cameraSince")
+        if saved > 0 { return saved }
+        let now = Int(Date().timeIntervalSince1970)
+        defaults.set(now, forKey: "cameraSince")
+        return now
+    }
+
+    private static func deviceID() -> String {
+        let defaults = UserDefaults.standard
+        if let saved = defaults.string(forKey: "cameraDeviceID") { return saved }
+        let created = UUID().uuidString
+        defaults.set(created, forKey: "cameraDeviceID")
+        return created
+    }
+
     func stop() {
+        isClosed = true
+        stopEngine()
+    }
+
+    private func stopEngine() {
         batteryTask?.cancel()
         batteryTask = nil
         engine?.stop()
@@ -87,7 +218,7 @@ final class CameraStation {
     }
 
     /// カメラとマイクの許可を求める。カメラが許可されれば true（マイクは無くても映像は送れる）。
-    private static func requestAccess() async -> Bool {
+    static func requestAccess() async -> Bool {
         #if targetEnvironment(simulator)
         return true
         #else

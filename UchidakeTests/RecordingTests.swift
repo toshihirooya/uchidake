@@ -563,7 +563,7 @@ final class ViewerEngineRecordingTests: XCTestCase {
         // 録画の開始と終了の瞬間に、生存通知で知らせる。開始ではキーフレームも頼む
         let packets = lock.withLock { sent }.compactMap(MediaPacket.init)
         XCTAssertEqual(packets.filter { if case .keepAlive = $0 { true } else { false } },
-                       [.keepAlive(isRecording: true), .keepAlive(isRecording: false)])
+                       [.keepAlive(isRecording: true, viewerID: ViewerEngine.viewerID), .keepAlive(isRecording: false, viewerID: ViewerEngine.viewerID)])
         XCTAssertTrue(packets.contains(.keyframeRequest))
     }
 

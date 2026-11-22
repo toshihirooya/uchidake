@@ -11,6 +11,7 @@ struct CameraView: View {
     @State private var lastTouch = Date()
     @State private var savedBrightness: CGFloat?
     @State private var confirmStop = false
+    @State private var showingPlan = false
 
     /// これだけさわらなければ、画面を暗くする
     private static let dimAfter: TimeInterval = 30
@@ -19,14 +20,44 @@ struct CameraView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            VideoLayerView(layer: station.previewLayer)
-                .ignoresSafeArea()
-                .opacity(isDimmed ? 0 : 1)
+            switch station.phase {
+            case .checking:
+                VStack(spacing: 14) {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(.white)
+                    Text("ほかのカメラを確かめています…")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                }
+            case .blocked(let otherName):
+                CameraBlockedView(otherName: otherName)
+            case .unavailable:
+                VStack(spacing: 16) {
+                    if let problem = station.problem {
+                        Text(problem.message)
+                            .font(.callout)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(Theme.warning)
+                    }
+                    Button("戻る") {
+                        model.backHome()
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.white)
+                }
+                .frame(maxWidth: 440)
+                .padding(24)
+            case .running:
+                VideoLayerView(layer: station.previewLayer)
+                    .ignoresSafeArea()
+                    .opacity(isDimmed ? 0 : 1)
 
-            if isDimmed {
-                dimmedContent
-            } else {
-                controls
+                if isDimmed {
+                    dimmedContent
+                } else {
+                    controls
+                }
             }
         }
         .contentShape(Rectangle())
@@ -40,7 +71,7 @@ struct CameraView: View {
             // さわらない時間を見張って、画面を暗くする
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(2))
-                if !isDimmed, station.problem == nil, Date().timeIntervalSince(lastTouch) > Self.dimAfter {
+                if !isDimmed, station.phase == .running, station.problem == nil, Date().timeIntervalSince(lastTouch) > Self.dimAfter {
                     dim()
                 }
             }
@@ -55,6 +86,9 @@ struct CameraView: View {
             }
         } message: {
             Text("見ている端末には映像が届かなくなります。")
+        }
+        .sheet(isPresented: $showingPlan) {
+            FamilyPlanView()
         }
         .animation(.easeInOut(duration: 0.3), value: isDimmed)
     }
@@ -135,6 +169,16 @@ struct CameraView: View {
                     roundButton(systemImage: "stop.fill", color: Theme.recording)
                 }
                 .accessibilityLabel("カメラを止める")
+
+                if !model.plan.isActive {
+                    Button {
+                        lastTouch = Date()
+                        showingPlan = true
+                    } label: {
+                        roundButton(systemImage: "person.3.fill", color: .white.opacity(0.25))
+                    }
+                    .accessibilityLabel("家族プランを見る")
+                }
             }
             .padding(.vertical, 20)
         }

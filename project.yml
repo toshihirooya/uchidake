@@ -9,7 +9,12 @@ targets:
   Uchidake:
     type: application
     platform: iOS
-    sources: [Uchidake]
+    sources:
+      - path: Uchidake
+        excludes: [FamilyPlan.storekit]
+      # シミュレータで購入を試すための商品定義。アプリの中には入れない
+      - path: Uchidake/FamilyPlan.storekit
+        buildPhase: none
     info:
       path: Uchidake/Info.plist
       properties:
@@ -57,7 +62,11 @@ targets:
   UchidakeTests:
     type: bundle.unit-test
     platform: iOS
-    sources: [UchidakeTests]
+    sources:
+      - path: UchidakeTests
+      # StoreKit のテストが読む商品定義
+      - path: Uchidake/FamilyPlan.storekit
+        buildPhase: resources
     dependencies:
       - target: Uchidake
     settings:
@@ -71,6 +80,7 @@ schemes:
         Uchidake: all
     run:
       config: Debug
+      storeKitConfiguration: Uchidake/FamilyPlan.storekit
     test:
       targets:
         - UchidakeTests

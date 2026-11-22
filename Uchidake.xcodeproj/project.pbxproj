@@ -7,7 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		047123A49B4F685F4D5EE24E /* PlanRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EBD5619A9C02A7D4D4D5132 /* PlanRecord.swift */; };
 		069AAB04A81FE68709C45871 /* PairingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF0EC401D5F86D9BB9DC7A5 /* PairingViews.swift */; };
+		0A78865E59FBF2522248ADDC /* FamilyPlan.storekit in Resources */ = {isa = PBXBuildFile; fileRef = E070CBD0D1093E45CA19D0D4 /* FamilyPlan.storekit */; };
+		12A1979F24C5AD081FECA0D5 /* ViewerAdmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BC209020781A7AF37A6B8E4 /* ViewerAdmission.swift */; };
+		17ABBD85489A4A7A90D6985C /* FamilyPlanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A542E283EBAE7148C81E95FD /* FamilyPlanStore.swift */; };
 		2F7A32774032B6B7D8B1CE25 /* StreamRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD33B28934A61FF8DDDDD426 /* StreamRecorder.swift */; };
 		36CF99F1CB71D4413081E8A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */; };
 		395C79FF973023DC59CE3687 /* ViewerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF63E9D5AC1C35BC86F20333 /* ViewerEngine.swift */; };
@@ -16,6 +20,8 @@
 		4D19CD42C55859AAC6FD80A3 /* UchidakeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */; };
 		5227BE173BE3D901FC7EAE77 /* PairingKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1902286F732938B6F1A6223F /* PairingKey.swift */; };
 		658D04A45DF787E1414EA37D /* MediaPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6F5B8C733560D808AC89B2 /* MediaPacket.swift */; };
+		6A52043CA672B2949078EF04 /* CameraStationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38F533DA34FC2334D0E2BAE /* CameraStationTests.swift */; };
+		6FED7CB95BB795F7133F6AF9 /* CameraCensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F4D3DE5C2FB435451F2106 /* CameraCensus.swift */; };
 		773C71A56D588BEE9F823433 /* ViewerSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */; };
 		7A3FAB90F45708FA5E969F4C /* CameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040969DA06DC00C38782B55A /* CameraCapture.swift */; };
 		80ECA356944C037A758F8CE7 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7EBC867C3371D1FAAC693BA /* CameraView.swift */; };
@@ -25,12 +31,17 @@
 		9F4936008AD4A86F521728F2 /* AudioPipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D5BC622370954A7238CFF1 /* AudioPipe.swift */; };
 		A74F550F416B7327B344D357 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B246059CA0951B09F8125BA3 /* HomeView.swift */; };
 		B28A4BCE3E3A4164EC85B1BD /* VideoLayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E249BB5429BECCEFC87B68 /* VideoLayerView.swift */; };
+		B517F35374D8960B2D0CBD52 /* ViewerAdmissionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA16008C607761CE6F72C60 /* ViewerAdmissionTests.swift */; };
+		BDEDFB9509B7A59C7FAF833C /* FamilyPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7B3DCDCEBEC67830D26851 /* FamilyPlanView.swift */; };
 		CAC6227610293EDA9E6A0ADF /* Problem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F49E5CDB05A26905321A88 /* Problem.swift */; };
+		D2B9E83148F7552926759933 /* CameraCensusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FE554FC2BCE93F7774573D9 /* CameraCensusTests.swift */; };
 		DBABC1C8ABC7AABEE36D7A21 /* ViewerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF36F9B742E3A1D2B617A3D2 /* ViewerViews.swift */; };
 		E2EB51F5174B6F87C8D1FBB6 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */; };
 		E6B49511A909A6CCCB26A872 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */; };
+		E87073A73EA8AA2AB1D78B93 /* FamilyPlanStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F07E457039D8C22DA90046 /* FamilyPlanStoreTests.swift */; };
 		F5C9C5B302F81EDF122B3DD2 /* RecordingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBEA158DCF8D70F9B0B2D3D /* RecordingTests.swift */; };
 		F8360A785B1C98003D86440C /* StillDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC2612F9D98BB310C0034EFD /* StillDecoder.swift */; };
+		FE040DBFA92E8BD01C5CD568 /* FamilyPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC6621C01EB3FE5E3443467 /* FamilyPlanTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,15 +62,20 @@
 		1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UchidakeApp.swift; sourceTree = "<group>"; };
 		2522EABB3C7CB172E9C8754A /* MediaSaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSaver.swift; sourceTree = "<group>"; };
 		2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		2EBD5619A9C02A7D4D4D5132 /* PlanRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanRecord.swift; sourceTree = "<group>"; };
 		2FBEA158DCF8D70F9B0B2D3D /* RecordingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingTests.swift; sourceTree = "<group>"; };
 		30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerSession.swift; sourceTree = "<group>"; };
 		30D5BC622370954A7238CFF1 /* AudioPipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPipe.swift; sourceTree = "<group>"; };
 		4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		51F49E5CDB05A26905321A88 /* Problem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Problem.swift; sourceTree = "<group>"; };
 		58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacketTests.swift; sourceTree = "<group>"; };
+		7FE554FC2BCE93F7774573D9 /* CameraCensusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCensusTests.swift; sourceTree = "<group>"; };
 		859E8D611D2E2E748F18B2B3 /* CameraStation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStation.swift; sourceTree = "<group>"; };
 		94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		9BC209020781A7AF37A6B8E4 /* ViewerAdmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerAdmission.swift; sourceTree = "<group>"; };
 		A269DFCEE68594D882CF5D37 /* VideoCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCodec.swift; sourceTree = "<group>"; };
+		A38F533DA34FC2334D0E2BAE /* CameraStationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStationTests.swift; sourceTree = "<group>"; };
+		A542E283EBAE7148C81E95FD /* FamilyPlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyPlanStore.swift; sourceTree = "<group>"; };
 		A640931916AC7D858635765C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AC2612F9D98BB310C0034EFD /* StillDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillDecoder.swift; sourceTree = "<group>"; };
 		AD33B28934A61FF8DDDDD426 /* StreamRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRecorder.swift; sourceTree = "<group>"; };
@@ -69,8 +85,14 @@
 		BDF0EC401D5F86D9BB9DC7A5 /* PairingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingViews.swift; sourceTree = "<group>"; };
 		C7EBC867C3371D1FAAC693BA /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		D2C77C72C46580053FB3D12C /* CameraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraEngine.swift; sourceTree = "<group>"; };
+		DE7B3DCDCEBEC67830D26851 /* FamilyPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyPlanView.swift; sourceTree = "<group>"; };
+		E070CBD0D1093E45CA19D0D4 /* FamilyPlan.storekit */ = {isa = PBXFileReference; path = FamilyPlan.storekit; sourceTree = "<group>"; };
+		E9F4D3DE5C2FB435451F2106 /* CameraCensus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCensus.swift; sourceTree = "<group>"; };
+		EEC6621C01EB3FE5E3443467 /* FamilyPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyPlanTests.swift; sourceTree = "<group>"; };
+		F0F07E457039D8C22DA90046 /* FamilyPlanStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyPlanStoreTests.swift; sourceTree = "<group>"; };
 		FB783C38B2BF93F83D6ED3CC /* Uchidake.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Uchidake.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF36F9B742E3A1D2B617A3D2 /* ViewerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerViews.swift; sourceTree = "<group>"; };
+		FFA16008C607761CE6F72C60 /* ViewerAdmissionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerAdmissionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -86,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */,
+				E070CBD0D1093E45CA19D0D4 /* FamilyPlan.storekit */,
 				A640931916AC7D858635765C /* Info.plist */,
 				2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */,
 				94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */,
@@ -94,6 +117,7 @@
 				51AE45D9575C1415089E76B6 /* Camera */,
 				661CDA339576C1F28F1F33F0 /* Media */,
 				03AE56135D92D476C2AFAA50 /* Security */,
+				4CF36897DD51F3AEEEFC3274 /* Store */,
 				20805C543C7EB4591694BE94 /* Viewer */,
 				67A4B155BA415609D20DBF2D /* Views */,
 			);
@@ -109,11 +133,22 @@
 			path = Viewer;
 			sourceTree = "<group>";
 		};
+		4CF36897DD51F3AEEEFC3274 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				A542E283EBAE7148C81E95FD /* FamilyPlanStore.swift */,
+				2EBD5619A9C02A7D4D4D5132 /* PlanRecord.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
 		51AE45D9575C1415089E76B6 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				E9F4D3DE5C2FB435451F2106 /* CameraCensus.swift */,
 				D2C77C72C46580053FB3D12C /* CameraEngine.swift */,
 				859E8D611D2E2E748F18B2B3 /* CameraStation.swift */,
+				9BC209020781A7AF37A6B8E4 /* ViewerAdmission.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -136,6 +171,7 @@
 			isa = PBXGroup;
 			children = (
 				C7EBC867C3371D1FAAC693BA /* CameraView.swift */,
+				DE7B3DCDCEBEC67830D26851 /* FamilyPlanView.swift */,
 				B246059CA0951B09F8125BA3 /* HomeView.swift */,
 				BDF0EC401D5F86D9BB9DC7A5 /* PairingViews.swift */,
 				06E249BB5429BECCEFC87B68 /* VideoLayerView.swift */,
@@ -165,8 +201,13 @@
 		B7FC9D5E3395A366E186D731 /* UchidakeTests */ = {
 			isa = PBXGroup;
 			children = (
+				7FE554FC2BCE93F7774573D9 /* CameraCensusTests.swift */,
+				A38F533DA34FC2334D0E2BAE /* CameraStationTests.swift */,
+				F0F07E457039D8C22DA90046 /* FamilyPlanStoreTests.swift */,
+				EEC6621C01EB3FE5E3443467 /* FamilyPlanTests.swift */,
 				58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */,
 				2FBEA158DCF8D70F9B0B2D3D /* RecordingTests.swift */,
+				FFA16008C607761CE6F72C60 /* ViewerAdmissionTests.swift */,
 			);
 			path = UchidakeTests;
 			sourceTree = "<group>";
@@ -197,6 +238,7 @@
 			buildConfigurationList = B976055A23259F444004E2DE /* Build configuration list for PBXNativeTarget "UchidakeTests" */;
 			buildPhases = (
 				0B3BABFC4F607596760D23D5 /* Sources */,
+				BA1D099B46EB651EA95B8750 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -257,6 +299,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BA1D099B46EB651EA95B8750 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A78865E59FBF2522248ADDC /* FamilyPlan.storekit in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -264,8 +314,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2B9E83148F7552926759933 /* CameraCensusTests.swift in Sources */,
+				6A52043CA672B2949078EF04 /* CameraStationTests.swift in Sources */,
+				E87073A73EA8AA2AB1D78B93 /* FamilyPlanStoreTests.swift in Sources */,
+				FE040DBFA92E8BD01C5CD568 /* FamilyPlanTests.swift in Sources */,
 				45BB58B07B6E896892BBF0AE /* MediaPacketTests.swift in Sources */,
 				F5C9C5B302F81EDF122B3DD2 /* RecordingTests.swift in Sources */,
+				B517F35374D8960B2D0CBD52 /* ViewerAdmissionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,20 +330,25 @@
 			files = (
 				9F4936008AD4A86F521728F2 /* AudioPipe.swift in Sources */,
 				7A3FAB90F45708FA5E969F4C /* CameraCapture.swift in Sources */,
+				6FED7CB95BB795F7133F6AF9 /* CameraCensus.swift in Sources */,
 				3AB0792645406236A25B1205 /* CameraEngine.swift in Sources */,
 				9BD9683D2AE8CB260EE44399 /* CameraStation.swift in Sources */,
 				80ECA356944C037A758F8CE7 /* CameraView.swift in Sources */,
+				17ABBD85489A4A7A90D6985C /* FamilyPlanStore.swift in Sources */,
+				BDEDFB9509B7A59C7FAF833C /* FamilyPlanView.swift in Sources */,
 				A74F550F416B7327B344D357 /* HomeView.swift in Sources */,
 				658D04A45DF787E1414EA37D /* MediaPacket.swift in Sources */,
 				8F526926D3933DEB16029EA8 /* MediaSaver.swift in Sources */,
 				5227BE173BE3D901FC7EAE77 /* PairingKey.swift in Sources */,
 				069AAB04A81FE68709C45871 /* PairingViews.swift in Sources */,
+				047123A49B4F685F4D5EE24E /* PlanRecord.swift in Sources */,
 				CAC6227610293EDA9E6A0ADF /* Problem.swift in Sources */,
 				F8360A785B1C98003D86440C /* StillDecoder.swift in Sources */,
 				2F7A32774032B6B7D8B1CE25 /* StreamRecorder.swift in Sources */,
 				4D19CD42C55859AAC6FD80A3 /* UchidakeApp.swift in Sources */,
 				97578CB530815D032E2B4272 /* VideoCodec.swift in Sources */,
 				B28A4BCE3E3A4164EC85B1BD /* VideoLayerView.swift in Sources */,
+				12A1979F24C5AD081FECA0D5 /* ViewerAdmission.swift in Sources */,
 				395C79FF973023DC59CE3687 /* ViewerEngine.swift in Sources */,
 				773C71A56D588BEE9F823433 /* ViewerSession.swift in Sources */,
 				DBABC1C8ABC7AABEE36D7A21 /* ViewerViews.swift in Sources */,
