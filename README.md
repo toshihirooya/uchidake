@@ -49,12 +49,12 @@ KEY=$(head -c 32 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=')
 ```
 
 ```bash
-xcrun simctl launch --console <カメラ役の UDID> com.example.Uchidake -autoKey "$KEY" -autoRole camera -autoName リビング
+xcrun simctl launch --console <カメラ役の UDID> com.toshihirooya.uchidake -autoKey "$KEY" -autoRole camera -autoName リビング
 ```
 
 ```bash
-xcrun simctl privacy <見る役の UDID> grant photos-add com.example.Uchidake
-xcrun simctl launch --console <見る役の UDID> com.example.Uchidake -autoKey "$KEY" -autoRole viewer
+xcrun simctl privacy <見る役の UDID> grant photos-add com.toshihirooya.uchidake
+xcrun simctl launch --console <見る役の UDID> com.toshihirooya.uchidake -autoKey "$KEY" -autoRole viewer
 ```
 
 写真と録画も試すときは、見る役に `-autoPhoto YES -autoRecord 5` を足す（つながったら写真を 1 枚撮り、5 秒録画する）。`privacy` の行は、見る役の「写真」への追加を許可する。
