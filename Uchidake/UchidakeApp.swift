@@ -14,6 +14,7 @@ struct UchidakeApp: App {
                     #if DEBUG
                     model.applyDebugLaunchOptions()
                     #endif
+                    model.plan.start()
                     model.resumeLastRole()
                     Task { await model.saver.recoverLeftovers() }
                 }
@@ -38,6 +39,8 @@ final class AppModel {
 
     /// 写真と動画を「写真」に入れる。見る画面より長く生きるので、アプリ全体で 1 つ持つ。
     let saver = MediaSaver()
+    /// 家族プランの購入と、この端末で有効かどうか
+    let plan = FamilyPlanStore()
 
     private(set) var mode: Mode = .home
     /// 端末どうしで共有する鍵。未設定なら nil。
@@ -142,6 +145,12 @@ final class AppModel {
         autoPhoto = defaults.bool(forKey: "autoPhoto")
         if let seconds = defaults.string(forKey: "autoRecord").flatMap(Double.init), seconds > 0 {
             autoRecordSeconds = seconds
+        }
+        // `-autoPlan family` / `-autoPlan free`: StoreKit を通さずに、家族プランの有無を決める
+        switch defaults.string(forKey: "autoPlan") {
+        case "family": plan.debugOverride = true
+        case "free": plan.debugOverride = false
+        default: break
         }
         guard autoKey != nil || role != nil else { return }
         didResume = true
