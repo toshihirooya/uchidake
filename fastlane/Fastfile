@@ -1,0 +1,43 @@
+default_platform(:ios)
+
+# 署名は fastlane match（証明書リポジトリは Clipan・sakecal と共有。Matchfile）。
+# Xcode のプロジェクトは手動署名で、実機向け（sdk=iphoneos）だけ次のプロファイル名を参照する：
+#   Debug   → "match Development com.toshihirooya.uchidake"
+#   Release → "match AppStore com.toshihirooya.uchidake"
+# シミュレータのビルド・テストにはプロファイルは要らない。
+#
+# Apple Developer への認証：環境変数 ASC_KEY_ID・ASC_ISSUER_ID・ASC_KEY_CONTENT（base64）が
+# あれば App Store Connect API キーを使う。無ければ Apple ID でのログインを求められる。
+# 証明書リポジトリの復号には MATCH_PASSWORD が要る（未設定なら入力を求められる）。
+
+platform :ios do
+  private_lane :asc_auth do
+    if ENV["ASC_KEY_ID"] && ENV["ASC_ISSUER_ID"] && ENV["ASC_KEY_CONTENT"]
+      app_store_connect_api_key(
+        key_id: ENV["ASC_KEY_ID"],
+        issuer_id: ENV["ASC_ISSUER_ID"],
+        key_content: ENV["ASC_KEY_CONTENT"],
+        is_key_content_base64: true
+      )
+    end
+  end
+
+  desc "証明書とプロファイルを取ってくる（Development と AppStore）"
+  desc "初回やプロファイルを作り直すときは readonly:false を付ける"
+  desc "例: bundle exec fastlane certificates readonly:false"
+  lane :certificates do |options|
+    readonly = options[:readonly].to_s != "false"
+    asc_auth unless readonly
+    match(type: "development", readonly: readonly)
+    match(type: "appstore", readonly: readonly)
+  end
+
+  desc "実機を Apple Developer に登録し、Development プロファイルに含め直す"
+  desc "例: bundle exec fastlane add_device name:\"Toshi iPhone\" udid:00008xxx-xxxxxxxxxxxxxxxx"
+  lane :add_device do |options|
+    UI.user_error!("name と udid を指定してください") unless options[:name] && options[:udid]
+    asc_auth
+    register_devices(devices: { options[:name] => options[:udid] })
+    match(type: "development", readonly: false, force_for_new_devices: true)
+  end
+end
