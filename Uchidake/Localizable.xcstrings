@@ -1,6 +1,36 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
+    "%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
+    },
+    "%@／年" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / year"
+          }
+        }
+      }
+    },
+    "%@／月" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / month"
+          }
+        }
+      }
+    },
     "%lld台が見ています（音も送っています）" : {
       "localizations" : {
         "en" : {
@@ -29,6 +59,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld watching"
+          }
+        }
+      }
+    },
+    "1 台のカメラを、同時に 4 台まで見られます（無料は 1 台）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 4 devices can watch one camera at once (1 on the free plan)"
+          }
+        }
+      }
+    },
+    "1 台のカメラを同時に 4 台まで見られ、カメラを 2 台以上使えます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch one camera on up to 4 devices at once, and use two or more cameras."
           }
         }
       }
@@ -183,6 +233,16 @@
         }
       }
     },
+    "この家では、すでに「%@」がカメラとして動いています。カメラを 2 台以上使うには、家族プランが必要です。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” is already running as a camera in this home. To use two or more cameras, you need the Family Plan."
+          }
+        }
+      }
+    },
     "この端末ではカメラを使えません。" : {
       "localizations" : {
         "en" : {
@@ -243,6 +303,16 @@
         }
       }
     },
+    "ほかのカメラを確かめています…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking for other cameras…"
+          }
+        }
+      }
+    },
     "ほかの端末が録画中" : {
       "localizations" : {
         "en" : {
@@ -289,6 +359,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "To connect another iPhone or iPad, show a QR code on this device and scan it with the one you are adding."
+          }
+        }
+      }
+    },
+    "もう一度試す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
           }
         }
       }
@@ -373,6 +453,16 @@
         }
       }
     },
+    "カメラを 2 台以上使えます（無料は 1 台）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use two or more cameras (1 on the free plan)"
+          }
+        }
+      }
+    },
     "カメラを始める" : {
       "localizations" : {
         "en" : {
@@ -443,12 +533,42 @@
         }
       }
     },
+    "サブスクリプションを管理" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Subscriptions"
+          }
+        }
+      }
+    },
+    "プライバシーポリシー" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy Policy"
+          }
+        }
+      }
+    },
     "マイクが許可されていないので、話しかけられません。設定アプリで許可してください。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "You can't talk because microphone access is off. Turn it on in the Settings app."
+          }
+        }
+      }
+    },
+    "一度の支払いで、ずっと使えます" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pay once, keep it forever"
           }
         }
       }
@@ -503,6 +623,16 @@
         }
       }
     },
+    "内容を見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See Details"
+          }
+        }
+      }
+    },
     "写真を保存しました" : {
       "localizations" : {
         "en" : {
@@ -529,6 +659,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Take photo"
+          }
+        }
+      }
+    },
+    "利用規約" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of Use"
           }
         }
       }
@@ -563,12 +703,72 @@
         }
       }
     },
+    "商品を読み込めませんでした。通信を確かめて、もう一度試してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t load the products. Check your connection and try again."
+          }
+        }
+      }
+    },
     "家の中で動いているカメラを探して、映像と音を確認します。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Find a camera running in your home, then watch and listen."
+          }
+        }
+      }
+    },
+    "家族プラン" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family Plan"
+          }
+        }
+      }
+    },
+    "家族プランが有効です" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Family Plan is active"
+          }
+        }
+      }
+    },
+    "家族プランは、カメラにする端末で有効にします。カメラの端末で、購入した Apple Account（またはファミリー共有の家族）でサインインして、「購入を復元」を押してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Family Plan is turned on at the camera device. On the camera device, sign in with the Apple Account that bought it (or a Family Sharing member’s) and tap “Restore Purchases.”"
+          }
+        }
+      }
+    },
+    "家族プランを見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See the Family Plan"
+          }
+        }
+      }
+    },
+    "年額" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly"
           }
         }
       }
@@ -609,6 +809,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Back"
+          }
+        }
+      }
+    },
+    "承認を待っています。承認されると、自動で有効になります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for approval. It will turn on automatically once approved."
           }
         }
       }
@@ -679,6 +889,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Watch"
+          }
+        }
+      }
+    },
+    "最初の 7 日間は無料" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free for the first 7 days"
+          }
+        }
+      }
+    },
+    "月額" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly"
+          }
+        }
+      }
+    },
+    "月額・年額は、期間が終わる 24 時間前までに解約しないかぎり、自動で更新されます。解約は、設定アプリの Apple Account の「サブスクリプション」からできます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly and yearly plans renew automatically unless cancelled at least 24 hours before the period ends. You can cancel under Subscriptions in your Apple Account in the Settings app."
           }
         }
       }
@@ -859,6 +1099,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done scanning? Continue"
+          }
+        }
+      }
+    },
+    "買い切り" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lifetime"
+          }
+        }
+      }
+    },
+    "買い切りで使えるのは、家の中で使う機能です。今後、外出先から見る機能を足す場合は、別の月額プランになります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The lifetime purchase covers features used inside your home. If watching from outside the home is added later, it will be a separate monthly plan."
+          }
+        }
+      }
+    },
+    "買い切りを購入しました。月額・年額は自動では止まらないので、「サブスクリプションを管理」から解約してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You bought the lifetime purchase. Your monthly or yearly subscription does not stop by itself, so cancel it from “Manage Subscriptions.”"
+          }
+        }
+      }
+    },
+    "購入が見つかりませんでした。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No purchase was found."
+          }
+        }
+      }
+    },
+    "購入できませんでした。もう一度試してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The purchase didn’t go through. Please try again."
+          }
+        }
+      }
+    },
+    "購入を復元" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Purchases"
           }
         }
       }

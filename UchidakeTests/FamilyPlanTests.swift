@@ -48,6 +48,14 @@ final class FamilyPlanTests: XCTestCase {
         XCTAssertNil(PlanJudge.next(remembered: sub(expiresIn: -31), current: [], now: t0))
     }
 
+    /// 購入画面に並べる商品。買い切りの人には何も出さず、月額・年額の人には買い切りだけ出す
+    func testOfferedProducts() {
+        XCTAssertEqual(FamilyPlanView.offered(for: nil, isActive: false), [.monthly, .yearly, .lifetime])
+        XCTAssertEqual(FamilyPlanView.offered(for: sub(expiresIn: -40), isActive: false), [.monthly, .yearly, .lifetime])
+        XCTAssertEqual(FamilyPlanView.offered(for: sub(expiresIn: 5), isActive: true), [.lifetime])
+        XCTAssertEqual(FamilyPlanView.offered(for: lifetime, isActive: true), [])
+    }
+
     func testRecordSurvivesJSON() throws {
         for record in [lifetime, sub(.yearly, expiresIn: 12.5)] {
             let data = try JSONEncoder().encode(record)

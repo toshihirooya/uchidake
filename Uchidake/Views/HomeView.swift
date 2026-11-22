@@ -5,6 +5,7 @@ struct HomeView: View {
     @Environment(AppModel.self) private var model
     @AppStorage(AppModel.cameraNameKey) private var cameraName = AppModel.defaultCameraName
     @State private var showingCode = false
+    @State private var showingPlan = false
     @State private var confirmingReset = false
 
     var body: some View {
@@ -32,6 +33,7 @@ struct HomeView: View {
                     viewerCard
                     cameraCard
                     addDeviceCard
+                    familyPlanCard
 
                     Button("設定をやり直す") {
                         confirmingReset = true
@@ -52,6 +54,9 @@ struct HomeView: View {
             }
         }) {
             PairingCodeView(isFirstDevice: model.setupNotice == .created)
+        }
+        .sheet(isPresented: $showingPlan) {
+            FamilyPlanView()
         }
         .onAppear {
             // 1 台目で鍵を作った直後は、続けて 2 台目を追加できるように QR コードを出す
@@ -99,6 +104,30 @@ struct HomeView: View {
         .padding(16)
         .background(Theme.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Theme.accent.opacity(0.5)))
+    }
+
+    private var familyPlanCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("家族プラン", systemImage: "person.3.fill")
+                .font(.title3.bold())
+            Text(model.plan.isActive
+                 ? "家族プランが有効です" as LocalizedStringKey
+                 : "1 台のカメラを同時に 4 台まで見られ、カメラを 2 台以上使えます。")
+                .font(.footnote)
+                .foregroundStyle(model.plan.isActive ? Theme.accent : .secondary)
+            Button {
+                showingPlan = true
+            } label: {
+                Text(model.plan.isActive ? "内容を見る" as LocalizedStringKey : "家族プランを見る")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.bordered)
+            .tint(Theme.accent)
+        }
+        .padding(20)
+        .background(Theme.panel, in: RoundedRectangle(cornerRadius: 20))
     }
 
     private var addDeviceCard: some View {

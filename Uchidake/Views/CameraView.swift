@@ -11,6 +11,7 @@ struct CameraView: View {
     @State private var lastTouch = Date()
     @State private var savedBrightness: CGFloat?
     @State private var confirmStop = false
+    @State private var showingPlan = false
 
     /// これだけさわらなければ、画面を暗くする
     private static let dimAfter: TimeInterval = 30
@@ -69,6 +70,9 @@ struct CameraView: View {
             }
         } message: {
             Text("見ている端末には映像が届かなくなります。")
+        }
+        .sheet(isPresented: $showingPlan) {
+            FamilyPlanView()
         }
         .animation(.easeInOut(duration: 0.3), value: isDimmed)
     }
@@ -149,6 +153,16 @@ struct CameraView: View {
                     roundButton(systemImage: "stop.fill", color: Theme.recording)
                 }
                 .accessibilityLabel("カメラを止める")
+
+                if !model.plan.isActive {
+                    Button {
+                        lastTouch = Date()
+                        showingPlan = true
+                    } label: {
+                        roundButton(systemImage: "person.3.fill", color: .white.opacity(0.25))
+                    }
+                    .accessibilityLabel("家族プランを見る")
+                }
             }
             .padding(.vertical, 20)
         }
