@@ -115,8 +115,8 @@ struct FamilyPlanView: View {
             case .ready:
                 VStack(spacing: 10) {
                     ForEach(offered, id: \.self) { kind in
-                        if let product = plan.products.first(where: { $0.id == kind.rawValue }) {
-                            offerButton(kind, product)
+                        if let offer = plan.offers.first(where: { $0.kind == kind }) {
+                            offerButton(offer)
                         }
                     }
                 }
@@ -130,9 +130,10 @@ struct FamilyPlanView: View {
         }
     }
 
-    private func offerButton(_ kind: PlanProduct, _ product: Product) -> some View {
-        Button {
-            buy(kind, product)
+    private func offerButton(_ offer: FamilyPlanStore.Offer) -> some View {
+        let kind = offer.kind
+        return Button {
+            buy(kind)
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
@@ -147,7 +148,7 @@ struct FamilyPlanView: View {
                     }
                 }
                 Spacer()
-                Text(Self.price(of: kind, product))
+                Text(Self.price(of: offer))
                     .font(.headline)
             }
             .frame(maxWidth: .infinity)
@@ -179,12 +180,12 @@ struct FamilyPlanView: View {
         .foregroundStyle(.secondary)
     }
 
-    private func buy(_ kind: PlanProduct, _ product: Product) {
+    private func buy(_ kind: PlanProduct) {
         let hadSubscription = plan.isActive && plan.record?.expires != nil
         busy = true
         notice = nil
         Task {
-            let outcome = await plan.purchase(product)
+            let outcome = await plan.purchase(kind)
             busy = false
             switch outcome {
             case .purchased:
@@ -221,12 +222,12 @@ struct FamilyPlanView: View {
         }
     }
 
-    /// 金額は StoreKit の表示をそのまま使う（文言には書かない）。
-    private static func price(of kind: PlanProduct, _ product: Product) -> LocalizedStringKey {
-        switch kind {
-        case .monthly: "\(product.displayPrice)／月"
-        case .yearly: "\(product.displayPrice)／年"
-        case .lifetime: "\(product.displayPrice)"
+    /// 金額は App Store の表示をそのまま使う（文言には書かない）。
+    private static func price(of offer: FamilyPlanStore.Offer) -> LocalizedStringKey {
+        switch offer.kind {
+        case .monthly: "\(offer.price)／月"
+        case .yearly: "\(offer.price)／年"
+        case .lifetime: "\(offer.price)"
         }
     }
 }

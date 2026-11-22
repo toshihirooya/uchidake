@@ -1,10 +1,22 @@
 import Foundation
 import Observation
-import StoreKit
+import RevenueCat
 
-/// 家族プランの購入と、この端末で有効かどうか。StoreKit 2 とやり取りする。
+/// RevenueCat の設定。値の実体は RevenueCat の管理画面にある。
+enum RevenueCatConfig {
+    /// iOS の Public SDK キー（`appl_` で始まる。アプリに入れてよい公開用のキー）。
+    /// 空のあいだは RevenueCat を使わず、購入画面は「商品を読み込めませんでした」になる。
+    static let publicSDKKey = ""
+    /// 家族プランの権利（Entitlement）の ID。月額・年額・買い切りの 3 商品をこれに結び付ける。
+    static let entitlementID = "family"
+    /// 購入画面に並べる商品の組（Offering）の ID。月額・年額・買い切りのパッケージを入れる。
+    static let offeringID = "default"
+}
+
+/// 家族プランの購入と、この端末で有効かどうか。RevenueCat の SDK とやり取りする。
 ///
-/// 判定はこの端末の Apple Account のものだけ。ほかの端末の家族プランは借りない。
+/// 利用者の ID は RevenueCat の匿名 ID（このアプリにログインは無い）。
+/// 判定はこの端末のものだけ。ほかの端末の家族プランは借りない。
 @MainActor
 @Observable
 final class FamilyPlanStore {
@@ -16,19 +28,26 @@ final class FamilyPlanStore {
         case purchased, cancelled, pending, failed
     }
 
+    /// 購入画面に並べる 1 商品。金額は App Store の表示そのまま。
+    struct Offer: Equatable {
+        let kind: PlanProduct
+        let price: String
+    }
+
     private static let recordKey = "familyPlanRecord"
 
-    /// 最後にわかった権利。StoreKit から読めないときも、これで判断する。
+    /// 最後にわかった権利。RevenueCat から読めないときも、これで判断する。
     private(set) var record: PlanRecord?
     private(set) var catalog: Catalog = .loading
     /// 月額・年額・買い切りの順
-    private(set) var products: [Product] = []
+    private(set) var offers: [Offer] = []
     /// 月額の「最初の 7 日間は無料」を使える人か
     private(set) var monthlyTrialAvailable = false
-    /// 検証用（デバッグビルドの `-autoPlan`）: StoreKit を通さずに、家族プランの有無を決める
+    /// 検証用（デバッグビルドの `-autoPlan`）: 購入を通さずに、家族プランの有無を決める
     var debugOverride: Bool?
 
     @ObservationIgnored private var updates: Task<Void, Never>?
+    @ObservationIgnored private var packages: [PlanProduct: Package] = [:]
     @ObservationIgnored private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -42,73 +61,61 @@ final class FamilyPlanStore {
         debugOverride ?? PlanJudge.isActive(record, now: Date())
     }
 
-    /// 権利を読み直し、以後の変化（購入・更新・返金・家族の購入）を追う。
+    /// RevenueCat を始め、以後の購入情報の変化（購入・更新・返金・家族の購入）を追う。
     func start() {
-        guard updates == nil else { return }
+        guard updates == nil, !RevenueCatConfig.publicSDKKey.isEmpty else { return }
+        if !Purchases.isConfigured {
+            Purchases.configure(withAPIKey: RevenueCatConfig.publicSDKKey)
+        }
         updates = Task { [weak self] in
-            await self?.refresh()
-            for await update in Transaction.updates {
-                if case .verified(let transaction) = update {
-                    await transaction.finish()
-                }
-                await self?.refresh()
+            for await info in Purchases.shared.customerInfoStream {
+                self?.apply(info)
             }
         }
-    }
-
-    /// - Parameter justPurchased: いま買ったばかりの権利。StoreKit への反映が少し遅れることがあるので、
-    ///   読み直した結果に足して判断する（買った直後に「無料」のままに見えないように）。
-    func refresh(justPurchased: PlanRecord? = nil) async {
-        var current: [PlanRecord] = justPurchased.map { [$0] } ?? []
-        for await entitlement in Transaction.currentEntitlements {
-            guard case .verified(let transaction) = entitlement, transaction.revocationDate == nil,
-                  let product = PlanProduct(rawValue: transaction.productID) else { continue }
-            current.append(PlanRecord(product: product, expires: transaction.expirationDate))
-        }
-        // 何も返らなかったとき、覚えている購入が取り消されたのかを確かめる
-        var revoked = false
-        if current.isEmpty, let record,
-           case .verified(let latest) = await Transaction.latest(for: record.product.rawValue) {
-            revoked = latest.revocationDate != nil
-        }
-        remember(PlanJudge.next(remembered: record, current: current, revoked: revoked, now: Date()))
     }
 
     func loadProducts() async {
         catalog = .loading
-        let ids = PlanProduct.allCases.map(\.rawValue)
-        guard let loaded = try? await Product.products(for: ids) else {
+        guard Purchases.isConfigured,
+              let offering = try? await Purchases.shared.offerings().offering(identifier: RevenueCatConfig.offeringID)
+        else {
             catalog = .unavailable
             return
         }
-        let ordered = ids.compactMap { id in loaded.first { $0.id == id } }
-        guard ordered.count == ids.count else {
+        var found: [PlanProduct: Package] = [:]
+        for package in offering.availablePackages {
+            if let kind = Self.kind(of: package) {
+                found[kind] = package
+            }
+        }
+        guard found.count == PlanProduct.allCases.count else {
             catalog = .unavailable
             return
         }
-        products = ordered
-        monthlyTrialAvailable = await ordered[0].subscription?.isEligibleForIntroOffer ?? false
+        packages = found
+        offers = PlanProduct.allCases.compactMap { kind in
+            found[kind].map { Offer(kind: kind, price: $0.storeProduct.localizedPriceString) }
+        }
+        if let monthly = found[.monthly]?.storeProduct {
+            monthlyTrialAvailable =
+                await Purchases.shared.checkTrialOrIntroDiscountEligibility(product: monthly) == .eligible
+        }
         catalog = .ready
     }
 
-    func purchase(_ product: Product) async -> PurchaseOutcome {
+    func purchase(_ kind: PlanProduct) async -> PurchaseOutcome {
+        guard Purchases.isConfigured, let package = packages[kind] else { return .failed }
         do {
-            switch try await product.purchase() {
-            case .success(.verified(let transaction)):
-                await transaction.finish()
-                await refresh(justPurchased: PlanProduct(rawValue: transaction.productID).map {
-                    PlanRecord(product: $0, expires: transaction.expirationDate)
-                })
-                return .purchased
-            case .success(.unverified):
-                return .failed
-            case .userCancelled:
+            let result = try await Purchases.shared.purchase(package: package)
+            if result.userCancelled {
                 return .cancelled
-            case .pending:
-                return .pending
-            @unknown default:
-                return .failed
             }
+            apply(result.customerInfo)
+            return .purchased
+        } catch let error as ErrorCode where error == .purchaseCancelledError {
+            return .cancelled
+        } catch let error as ErrorCode where error == .paymentPendingError {
+            return .pending
         } catch {
             return .failed
         }
@@ -116,9 +123,27 @@ final class FamilyPlanStore {
 
     /// 「購入を復元」。有効になれば true。
     func restore() async -> Bool {
-        try? await AppStore.sync()
-        await refresh()
+        guard Purchases.isConfigured, let info = try? await Purchases.shared.restorePurchases() else { return isActive }
+        apply(info)
         return isActive
+    }
+
+    /// パッケージが、家族プランのどの買い方か。種類で見分け、だめなら商品 ID で見分ける。
+    private static func kind(of package: Package) -> PlanProduct? {
+        switch package.packageType {
+        case .monthly: .monthly
+        case .annual: .yearly
+        case .lifetime: .lifetime
+        default: PlanProduct(rawValue: package.storeProduct.productIdentifier)
+        }
+    }
+
+    private func apply(_ info: CustomerInfo) {
+        let entitlement = info.entitlements[RevenueCatConfig.entitlementID]
+        let active = entitlement?.isActive == true ? entitlement : nil
+        let reading = PlanJudge.Reading(
+            productID: active?.productIdentifier, expires: active?.expirationDate, fetchedAt: info.requestDate)
+        remember(PlanJudge.next(remembered: record, reading: reading, now: Date()))
     }
 
     private func remember(_ next: PlanRecord?) {
