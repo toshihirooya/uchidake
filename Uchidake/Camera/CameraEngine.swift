@@ -117,8 +117,16 @@ final class CameraEngine {
     /// 広告に載せる情報を差し替える（確認が済んだ、家族プランが変わった）。
     func setAdvert(_ advert: CameraAdvert) {
         queue.async {
+            guard self.advert != advert else { return }
             self.advert = advert
-            self.listener?.service = self.service
+            // 動いている待ち受けの広告を書き換えると、新しい接続を受けられなくなる。
+            // 待ち受けを作り直す（つながっている見る側は、そのまま残る）。
+            guard !self.isStopped, let old = self.listener else { return }
+            old.stateUpdateHandler = nil
+            old.newConnectionHandler = nil
+            old.cancel()
+            self.listener = nil
+            self.startListener()
         }
     }
 

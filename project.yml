@@ -62,7 +62,11 @@ targets:
   UchidakeTests:
     type: bundle.unit-test
     platform: iOS
-    sources: [UchidakeTests]
+    sources:
+      - path: UchidakeTests
+      # StoreKit のテストが読む商品定義
+      - path: Uchidake/FamilyPlan.storekit
+        buildPhase: resources
     dependencies:
       - target: Uchidake
     settings:

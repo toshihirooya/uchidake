@@ -56,8 +56,10 @@ final class FamilyPlanStore {
         }
     }
 
-    func refresh() async {
-        var current: [PlanRecord] = []
+    /// - Parameter justPurchased: いま買ったばかりの権利。StoreKit への反映が少し遅れることがあるので、
+    ///   読み直した結果に足して判断する（買った直後に「無料」のままに見えないように）。
+    func refresh(justPurchased: PlanRecord? = nil) async {
+        var current: [PlanRecord] = justPurchased.map { [$0] } ?? []
         for await entitlement in Transaction.currentEntitlements {
             guard case .verified(let transaction) = entitlement, transaction.revocationDate == nil,
                   let product = PlanProduct(rawValue: transaction.productID) else { continue }
@@ -88,7 +90,9 @@ final class FamilyPlanStore {
             switch try await product.purchase() {
             case .success(.verified(let transaction)):
                 await transaction.finish()
-                await refresh()
+                await refresh(justPurchased: PlanProduct(rawValue: transaction.productID).map {
+                    PlanRecord(product: $0, expires: transaction.expirationDate)
+                })
                 return .purchased
             case .success(.unverified):
                 return .failed

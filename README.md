@@ -30,13 +30,18 @@ xcodegen generate
 xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=iOS Simulator,name=iPhone Air' test
 ```
 
+## 家族プランの購入を試す
+
+商品は `Uchidake/FamilyPlan.storekit` に書いてある。Xcode からシミュレータで実行すると、最初の画面の「家族プラン」から購入・復元を試せる（購入の取り消しは Xcode の Debug > StoreKit > Manage Transactions）。購入を通さずに台数の制限だけを試すときは、起動オプション `-autoPlan family` / `-autoPlan free` を使う（`docs/spec.md` の9章）。
+
 ## 構成
 
 | 場所 | 中身 |
 |---|---|
 | `Uchidake/Security/` | 端末どうしで共有する鍵（QR コードで渡す）と、DTLS の設定。 |
 | `Uchidake/Media/` | パケットの形式、カメラの取り込み、H.264 の圧縮、音声。見る側の写真の復元と録画（MP4）、「写真」への保存。 |
-| `Uchidake/Camera/` | カメラ役。待ち受けて、見る側すべてに映像と音を送る。 |
+| `Uchidake/Camera/` | カメラ役。待ち受けて、見る側すべてに映像と音を送る。見る側の上限と、同じ組のカメラの台数の確認。 |
+| `Uchidake/Store/` | 家族プラン（アプリ内課金）。StoreKit 2 とのやり取りと、有効かどうかの判断。 |
 | `Uchidake/Viewer/` | 見る役。カメラを探してつなぎ、映像と音を受ける。 |
 | `Uchidake/Views/` | 画面。 |
 
