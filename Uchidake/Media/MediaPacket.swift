@@ -49,13 +49,15 @@ enum MediaPacket: Equatable {
     case video(frameID: UInt32, index: Int, count: Int, payload: Data)
     case audio(sequence: UInt32, pcm: Data)
     case keyframeRequest
-    /// 見る側の生存通知。フラグのビット 0 が「録画中」。
-    case keepAlive(isRecording: Bool)
+    /// 見る側の生存通知。フラグのビット 0 が「録画中」。ID は、つなぎ直した同じ端末を見分けるためのもの（古い版には無い）。
+    case keepAlive(isRecording: Bool, viewerID: UInt64?)
     case status(CameraStatus)
     case command(CameraCommand, sequence: UInt32)
+    /// カメラが、上限のために見る側を断る。
+    case refusal(RefusalReason)
 
     private enum Kind: UInt8 {
-        case video = 1, audio, keyframeRequest, keepAlive, status, command
+        case video = 1, audio, keyframeRequest, keepAlive, status, command, refusal
     }
 
     /// 1 パケットに入れる映像データの上限。経路の MTU（約1500）に DTLS などの分の余裕を見た値。
@@ -88,8 +90,13 @@ enum MediaPacket: Equatable {
             return data
         case .keyframeRequest:
             return Data([Kind.keyframeRequest.rawValue])
-        case .keepAlive(let isRecording):
-            return Data([Kind.keepAlive.rawValue, isRecording ? 1 : 0])
+        case .keepAlive(let isRecording, let viewerID):
+            var data = Data([Kind.keepAlive.rawValue, isRecording ? 1 : 0])
+            if let viewerID {
+                data.append(bigEndian: UInt32(viewerID >> 32))
+                data.append(bigEndian: UInt32(viewerID & 0xFFFF_FFFF))
+            }
+            return data
         case .status(let status):
             var data = Data([Kind.status.rawValue])
             data.append((try? JSONEncoder().encode(status)) ?? Data())
@@ -99,6 +106,8 @@ enum MediaPacket: Equatable {
             data.append(bigEndian: sequence)
             data.append(command.rawValue)
             return data
+        case .refusal(let reason):
+            return Data([Kind.refusal.rawValue, reason.rawValue])
         }
     }
 
@@ -121,13 +130,20 @@ enum MediaPacket: Equatable {
             self = .keyframeRequest
         case .keepAlive:
             // 古い版はフラグが無い。無ければ録画していない。ビット 0 以外は無視する。
-            self = .keepAlive(isRecording: bytes.count > 1 && bytes[1] & 1 != 0)
+            // ID は 8 バイトそろっているときだけ読む（古い版には無い）。
+            let viewerID = bytes.count == 10
+                ? UInt64(Self.uint32(bytes, at: 2)) << 32 | UInt64(Self.uint32(bytes, at: 6))
+                : nil
+            self = .keepAlive(isRecording: bytes.count > 1 && bytes[1] & 1 != 0, viewerID: viewerID)
         case .status:
             guard let status = try? JSONDecoder().decode(CameraStatus.self, from: Data(bytes[1...])) else { return nil }
             self = .status(status)
         case .command:
             guard bytes.count == 6, let command = CameraCommand(rawValue: bytes[5]) else { return nil }
             self = .command(command, sequence: Self.uint32(bytes, at: 1))
+        case .refusal:
+            guard bytes.count == 2, let reason = RefusalReason(rawValue: bytes[1]) else { return nil }
+            self = .refusal(reason)
         }
     }
 

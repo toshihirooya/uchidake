@@ -18,12 +18,16 @@ final class CameraStation {
     @ObservationIgnored let previewLayer = AVSampleBufferDisplayLayer()
 
     @ObservationIgnored private let key: Data
+    @ObservationIgnored private let plan: FamilyPlanStore
+    /// エンジンに最後に伝えた、家族プランの有無
+    @ObservationIgnored private var toldFamilyPlan = false
     @ObservationIgnored private var engine: CameraEngine?
     @ObservationIgnored private var batteryTask: Task<Void, Never>?
 
-    init(name: String, key: Data) {
+    init(name: String, key: Data, plan: FamilyPlanStore) {
         self.name = name
         self.key = key
+        self.plan = plan
         previewLayer.videoGravity = .resizeAspect
     }
 
@@ -35,7 +39,8 @@ final class CameraStation {
         }
         guard engine == nil else { return }
 
-        let engine = CameraEngine(name: name, key: key, previewLayer: previewLayer)
+        toldFamilyPlan = plan.isActive
+        let engine = CameraEngine(name: name, key: key, previewLayer: previewLayer, hasFamilyPlan: toldFamilyPlan)
         engine.onChange = { [weak self] snapshot in
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
@@ -54,15 +59,38 @@ final class CameraStation {
         }
         self.engine = engine
         engine.start()
+        watchPlan()
 
         // 電池の状態を、見る側に知らせるために渡し続ける
         UIDevice.current.isBatteryMonitoringEnabled = true
         batteryTask = Task { [weak self] in
             while !Task.isCancelled {
                 self?.reportBattery()
+                // 月額・年額の期限は時間で切れるので、ここでも見直す
+                self?.syncPlan()
                 try? await Task.sleep(for: .seconds(20))
             }
         }
+    }
+
+    /// 家族プランが変わったら（購入・復元・期限切れ）、エンジンに伝える。
+    private func watchPlan() {
+        withObservationTracking {
+            _ = plan.isActive
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self, self.engine != nil else { return }
+                self.syncPlan()
+                self.watchPlan()
+            }
+        }
+    }
+
+    private func syncPlan() {
+        let active = plan.isActive
+        guard let engine, active != toldFamilyPlan else { return }
+        toldFamilyPlan = active
+        engine.setFamilyPlan(active)
     }
 
     func stop() {

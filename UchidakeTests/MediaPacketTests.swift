@@ -9,7 +9,7 @@ final class MediaPacketTests: XCTestCase {
             .video(frameID: 0x0102_0304, index: 3, count: 7, payload: Data([9, 8, 7])),
             .audio(sequence: 42, pcm: Data([1, 2, 3, 4])),
             .keyframeRequest,
-            .keepAlive(isRecording: true),
+            .keepAlive(isRecording: true, viewerID: nil),
             .status(status),
             .command(.switchCamera, sequence: 0xDEAD_BEEF),
         ]
@@ -19,14 +19,32 @@ final class MediaPacketTests: XCTestCase {
     }
 
     func testKeepAliveCarriesRecordingFlag() {
-        XCTAssertEqual(MediaPacket.keepAlive(isRecording: true).encoded(), Data([4, 1]))
-        XCTAssertEqual(MediaPacket.keepAlive(isRecording: false).encoded(), Data([4, 0]))
-        XCTAssertEqual(MediaPacket(Data([4, 1])), .keepAlive(isRecording: true))
-        XCTAssertEqual(MediaPacket(Data([4, 0xFE])), .keepAlive(isRecording: false))  // ほかのビットは無視
+        XCTAssertEqual(MediaPacket.keepAlive(isRecording: true, viewerID: nil).encoded(), Data([4, 1]))
+        XCTAssertEqual(MediaPacket.keepAlive(isRecording: false, viewerID: nil).encoded(), Data([4, 0]))
+        XCTAssertEqual(MediaPacket(Data([4, 1])), .keepAlive(isRecording: true, viewerID: nil))
+        XCTAssertEqual(MediaPacket(Data([4, 0xFE])), .keepAlive(isRecording: false, viewerID: nil))  // ほかのビットは無視
+    }
+
+    func testKeepAliveCarriesViewerID() {
+        let packet = MediaPacket.keepAlive(isRecording: true, viewerID: 0x0102_0304_0506_0708)
+        XCTAssertEqual(packet.encoded(), Data([4, 1, 1, 2, 3, 4, 5, 6, 7, 8]))
+        XCTAssertEqual(MediaPacket(packet.encoded()), packet)
+    }
+
+    func testKeepAliveWithoutIDIsReadAsNoID() {
+        XCTAssertEqual(MediaPacket(Data([4, 1])), .keepAlive(isRecording: true, viewerID: nil))
+        XCTAssertEqual(MediaPacket(Data([4, 0, 9, 9])), .keepAlive(isRecording: false, viewerID: nil))  // 半端な長さ
+    }
+
+    func testRefusalRoundTrips() {
+        XCTAssertEqual(MediaPacket.refusal(.freeLimit).encoded(), Data([7, 1]))
+        XCTAssertEqual(MediaPacket(Data([7, 2])), .refusal(.familyLimit))
+        XCTAssertNil(MediaPacket(Data([7])))
+        XCTAssertNil(MediaPacket(Data([7, 99])))
     }
 
     func testOldKeepAliveWithoutFlagMeansNotRecording() {
-        XCTAssertEqual(MediaPacket(Data([4])), .keepAlive(isRecording: false))
+        XCTAssertEqual(MediaPacket(Data([4])), .keepAlive(isRecording: false, viewerID: nil))
     }
 
     func testStatusWithoutRecordersDecodesAsZero() throws {

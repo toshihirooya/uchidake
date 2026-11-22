@@ -38,7 +38,8 @@ final class CameraEngine {
         var problem: Problem?
     }
 
-    static let maxViewers = 4
+    /// 上限に達しているとき、つないできた相手の最初の生存通知をこれだけ待つ
+    private static let admissionWait: TimeInterval = 2
     /// これだけ何も届かない見る側は、いなくなったものとして切る
     private static let viewerTimeout: TimeInterval = 6
 
@@ -48,6 +49,13 @@ final class CameraEngine {
     private final class Viewer {
         let connection: NWConnection
         var isReady = false
+        /// 見る側として受け入れたか。映像・音・状態を送るのは、受け入れた相手だけ。
+        var isAdmitted = false
+        /// 断ることにした（理由を送り終えたら切る）
+        var isRefused = false
+        /// 生存通知に付いてきた、見る側の端末の ID。古い版は付けない。
+        var id: UInt64?
+        var readySince = Date()
         var lastHeard = Date()
         /// 実行済みの操作の通し番号（同じ操作が複数回届くため）
         var handledCommands: Set<UInt32> = []
@@ -82,9 +90,11 @@ final class CameraEngine {
     private var isAudioRunning = false
     private var ticks = 0
     private var isStopped = false
+    private var hasFamilyPlan: Bool
 
-    init(name: String, key: Data, previewLayer: AVSampleBufferDisplayLayer) {
+    init(name: String, key: Data, previewLayer: AVSampleBufferDisplayLayer, hasFamilyPlan: Bool) {
         self.name = name
+        self.hasFamilyPlan = hasFamilyPlan
         self.key = key
         self.previewLayer = previewLayer
         capture = CameraCapture(label: name)
@@ -154,6 +164,14 @@ final class CameraEngine {
         capture.switchCamera()
     }
 
+    /// この端末の家族プランが変わった。新しくつなぐ相手から、新しい上限を使う。
+    /// いま見ている相手は切らない。
+    func setFamilyPlan(_ active: Bool) {
+        queue.async {
+            self.hasFamilyPlan = active
+        }
+    }
+
     /// 電池の状態を伝える（見る側への状態の通知に載せる）。
     func setBattery(level: Int?, isCharging: Bool) {
         queue.async {
@@ -207,7 +225,8 @@ final class CameraEngine {
     }
 
     private func accept(_ connection: NWConnection) {
-        guard viewers.count < Self.maxViewers else {
+        // 保留中の相手も含めた、接続の数そのものの上限
+        guard viewers.count < ViewerAdmission.limit(hasFamilyPlan: true) + 4 else {
             connection.cancel()
             return
         }
@@ -220,11 +239,12 @@ final class CameraEngine {
                 // DTLS のハンドシェイクが通った。鍵が同じ端末。
                 viewer.isReady = true
                 viewer.lastHeard = Date()
+                viewer.readySince = Date()
                 self.receive(from: viewer)
-                self.viewersChanged()
-                // 途中から見始めた人がすぐ映像を出せるよう、キーフレームを送る
-                self.encoder.requestKeyframe()
-                self.sendStatus()
+                // 空きがあればすぐ入れる。上限のときは、最初の生存通知（端末の ID）を待って決める。
+                if self.admitted.count < ViewerAdmission.limit(hasFamilyPlan: self.hasFamilyPlan) {
+                    self.admit(viewer)
+                }
             case .failed, .cancelled:
                 self.remove(viewer)
             default:
@@ -232,6 +252,42 @@ final class CameraEngine {
             }
         }
         connection.start(queue: queue)
+    }
+
+    private var admitted: [Viewer] {
+        viewers.filter(\.isAdmitted)
+    }
+
+    private func admit(_ viewer: Viewer) {
+        viewer.isAdmitted = true
+        viewersChanged()
+        // 途中から見始めた人がすぐ映像を出せるよう、キーフレームを送る
+        encoder.requestKeyframe()
+        sendStatus()
+    }
+
+    /// 保留中の相手を、入れるか・入れ替えるか・断るか決める。
+    private func settle(_ viewer: Viewer) {
+        guard !viewer.isAdmitted, !viewer.isRefused else { return }
+        let current = admitted
+        switch ViewerAdmission.decide(newID: viewer.id, admitted: current.map(\.id), hasFamilyPlan: hasFamilyPlan) {
+        case .admit:
+            admit(viewer)
+        case .replace(let index):
+            remove(current[index])
+            admit(viewer)
+        case .refuse(let reason):
+            viewer.isRefused = true
+            let packet = MediaPacket.refusal(reason).encoded()
+            // 届かないことがあるので 3 回送り、送り終えるのを少し待ってから切る
+            for _ in 0..<3 {
+                viewer.connection.send(content: packet, completion: .idempotent)
+            }
+            queue.asyncAfter(deadline: .now() + 0.5) { [weak self, weak viewer] in
+                guard let self, let viewer else { return }
+                self.remove(viewer)
+            }
+        }
     }
 
     private func remove(_ viewer: Viewer) {
@@ -249,7 +305,7 @@ final class CameraEngine {
 
     /// 見ている人の数が変わった。マイクは、誰かが見ているあいだだけ使う。
     private func viewersChanged() {
-        let count = viewers.filter(\.isReady).count
+        let count = admitted.count
         setHasViewers(count > 0)
         if count > 0, !isAudioRunning {
             audio.start(useMicrophone: true)
@@ -296,6 +352,11 @@ final class CameraEngine {
         for viewer in viewers where now.timeIntervalSince(viewer.lastHeard) > Self.viewerTimeout {
             remove(viewer)
         }
+        // 生存通知を送ってこない保留中の相手（古い版など）も、待ちすぎずに決める
+        for viewer in viewers where viewer.isReady && !viewer.isAdmitted
+            && now.timeIntervalSince(viewer.readySince) > Self.admissionWait {
+            settle(viewer)
+        }
         ticks += 1
         if ticks % 2 == 0 {
             sendStatus()
@@ -305,7 +366,7 @@ final class CameraEngine {
     // MARK: - 送信
 
     private func sendToAll(_ packet: Data) {
-        for viewer in viewers where viewer.isReady {
+        for viewer in viewers where viewer.isAdmitted {
             viewer.connection.send(content: packet, completion: .idempotent)
         }
     }
@@ -347,8 +408,23 @@ final class CameraEngine {
     }
 
     private func handle(_ packet: MediaPacket, from viewer: Viewer) {
+        if case .keepAlive(_, let id) = packet {
+            if viewer.id == nil {
+                viewer.id = id
+            }
+            if !viewer.isAdmitted {
+                settle(viewer)
+            } else if let id {
+                // 空きがあってすぐ入れた相手が、つなぎ直した同じ端末だった。古いほうを片付ける。
+                for old in admitted where old !== viewer && old.id == id {
+                    remove(old)
+                }
+            }
+        }
+        // 受け入れていない相手の操作や声は通さない
+        guard viewer.isAdmitted else { return }
         switch packet {
-        case .keepAlive(let isRecording):
+        case .keepAlive(let isRecording, _):
             if recorders.update(viewer: ObjectIdentifier(viewer), isRecording: isRecording) {
                 snapshot.recorderCount = recorders.count
                 publish()
@@ -365,7 +441,7 @@ final class CameraEngine {
             case .switchCamera:
                 capture.switchCamera()
             }
-        case .video, .status:
+        case .video, .status, .refusal:
             break  // カメラが送る側のパケット
         }
     }

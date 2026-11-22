@@ -163,6 +163,26 @@
         }
       }
     },
+    "このカメラは、いま 4 台が見ています。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 devices are already watching this camera."
+          }
+        }
+      }
+    },
+    "このカメラは、いま別の端末が見ています。カメラの端末を家族プランにすると、同時に 4 台まで見られます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another device is watching this camera right now. With the Family Plan on the camera device, up to 4 devices can watch at once."
+          }
+        }
+      }
+    },
     "この端末ではカメラを使えません。" : {
       "localizations" : {
         "en" : {
