@@ -118,7 +118,7 @@ DTLS の中を流れる 1 データグラムの形式。先頭 1 バイトが種
 - 見る側: `viewer live=… frames=… viewers=…`（つながったとき、受信が進んだとき）、`viewer recording=1` / `recording=0`（録画が始まった・ファイルを閉じ終えたとき）、`saved photo` / `saved video` / `save failed …`（「写真」への保存の結果）
 - カメラ側: `camera viewers=… recorders=…`（見ている台数か録画中の台数が変わったとき）
 
-シミュレータで写真と録画を試すときは、見る側に「写真」への追加を許可しておく: `xcrun simctl privacy <UDID> grant photos-add com.example.Uchidake`。シミュレータでは、テスト画像と確認音のデータがそのまま写真と動画になる。
+シミュレータで写真と録画を試すときは、見る側に「写真」への追加を許可しておく: `xcrun simctl privacy <UDID> grant photos-add com.toshihirooya.uchidake`。シミュレータでは、テスト画像と確認音のデータがそのまま写真と動画になる。
 
 ## 10. 既知の制限
 
