@@ -31,21 +31,28 @@ final class FamilyPlanTests: XCTestCase {
 
     func testStoreKitResultWins() {
         XCTAssertEqual(
-            PlanJudge.next(remembered: nil, current: [sub(expiresIn: 5), sub(.yearly, expiresIn: 300)], now: t0),
+            PlanJudge.next(remembered: nil, current: [sub(expiresIn: 5), sub(.yearly, expiresIn: 300)], revoked: false, now: t0),
             sub(.yearly, expiresIn: 300))
         XCTAssertEqual(
-            PlanJudge.next(remembered: sub(expiresIn: 5), current: [sub(expiresIn: 5), lifetime], now: t0),
+            PlanJudge.next(remembered: sub(expiresIn: 5), current: [sub(expiresIn: 5), lifetime], revoked: false, now: t0),
             lifetime)
     }
 
-    func testEmptyResultBeforeExpiryMeansRevoked() {
-        XCTAssertNil(PlanJudge.next(remembered: sub(expiresIn: 5), current: [], now: t0))
-        XCTAssertNil(PlanJudge.next(remembered: lifetime, current: [], now: t0))
+    /// StoreKit が 1 回何も返さなかっただけでは、払った人の記録を消さない
+    func testEmptyResultAloneDoesNotWipeAPaidRecord() {
+        XCTAssertEqual(PlanJudge.next(remembered: sub(expiresIn: 5), current: [], revoked: false, now: t0), sub(expiresIn: 5))
+        XCTAssertEqual(PlanJudge.next(remembered: lifetime, current: [], revoked: false, now: t0), lifetime)
+    }
+
+    /// 返金などで取り消されたと StoreKit が言ったときだけ消す
+    func testRevokedRecordIsWiped() {
+        XCTAssertNil(PlanJudge.next(remembered: sub(expiresIn: 5), current: [], revoked: true, now: t0))
+        XCTAssertNil(PlanJudge.next(remembered: lifetime, current: [], revoked: true, now: t0))
     }
 
     func testEmptyResultAfterExpiryKeepsRecordDuringGrace() {
-        XCTAssertEqual(PlanJudge.next(remembered: sub(expiresIn: -10), current: [], now: t0), sub(expiresIn: -10))
-        XCTAssertNil(PlanJudge.next(remembered: sub(expiresIn: -31), current: [], now: t0))
+        XCTAssertEqual(PlanJudge.next(remembered: sub(expiresIn: -10), current: [], revoked: false, now: t0), sub(expiresIn: -10))
+        XCTAssertNil(PlanJudge.next(remembered: sub(expiresIn: -31), current: [], revoked: false, now: t0))
     }
 
     /// 購入画面に並べる商品。買い切りの人には何も出さず、月額・年額の人には買い切りだけ出す

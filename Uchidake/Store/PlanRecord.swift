@@ -28,17 +28,18 @@ enum PlanJudge {
     }
 
     /// StoreKit がいま返した権利（`current`）と、覚えていた記録から、次に覚える記録を決める。
-    static func next(remembered: PlanRecord?, current: [PlanRecord], now: Date) -> PlanRecord? {
+    /// - Parameter revoked: 覚えていた記録の購入が、返金などで取り消されたと StoreKit が言っている
+    static func next(remembered: PlanRecord?, current: [PlanRecord], revoked: Bool, now: Date) -> PlanRecord? {
         if let lifetime = current.first(where: { $0.expires == nil }) {
             return lifetime
         }
         if let latest = current.max(by: { ($0.expires ?? .distantPast) < ($1.expires ?? .distantPast) }) {
             return latest
         }
-        // StoreKit は何も返さなかった。
-        // 買い切りや期限内の月額・年額なら、端末に控えがあるはずなので、取り消された（返金・サインアウト）。
-        guard let remembered, let expires = remembered.expires, now >= expires else { return nil }
-        // 期限を過ぎている。更新を知れないだけかもしれないので、猶予のあいだは残す。
+        // StoreKit は何も返さなかった。取り消されたとはっきり分かるときだけ消す。
+        // 読み出しが一時的に空になることがあり、それだけで払った人の記録を消してはいけない。
+        guard let remembered, !revoked else { return nil }
+        // 月額・年額は、期限を過ぎても更新を知れないだけかもしれないので、猶予のあいだは残す。
         return isActive(remembered, now: now) ? remembered : nil
     }
 }

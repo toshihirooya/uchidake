@@ -81,6 +81,37 @@ enum CameraCensus {
         return .start
     }
 
+    /// 広告に出ているカメラが、いま本当に動いているか。その名前へつないで、ハンドシェイクが通るかで確かめる。
+    ///
+    /// Bonjour の広告は、電池切れなどで消えたカメラのものがしばらく残る。
+    /// それで「すでにカメラがいる」と止めないために、止める前に確かめる。
+    @MainActor
+    static func isReachable(name: String, key: Data) async -> Bool {
+        let connection = NWConnection(
+            to: .service(name: name, type: MediaSecurity.serviceType, domain: "local.", interface: nil),
+            using: MediaSecurity.parameters(key: key))
+        let reached = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+            var answered = false
+            func answer(_ value: Bool) {
+                guard !answered else { return }
+                answered = true
+                continuation.resume(returning: value)
+            }
+            connection.stateUpdateHandler = { state in
+                switch state {
+                case .ready: answer(true)
+                case .failed, .cancelled: answer(false)
+                default: break
+                }
+            }
+            connection.start(queue: .main)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { answer(false) }
+        }
+        connection.stateUpdateHandler = nil
+        connection.cancel()
+        return reached
+    }
+
     /// しばらく探して、見つかったカメラの広告を返す。探せなければ空（＝止めずに始めることになる）。
     @MainActor
     static func survey(seconds: TimeInterval = 2) async -> [(name: String, advert: CameraAdvert?)] {

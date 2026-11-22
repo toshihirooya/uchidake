@@ -32,6 +32,22 @@ struct CameraView: View {
                 }
             case .blocked(let otherName):
                 CameraBlockedView(otherName: otherName)
+            case .unavailable:
+                VStack(spacing: 16) {
+                    if let problem = station.problem {
+                        Text(problem.message)
+                            .font(.callout)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(Theme.warning)
+                    }
+                    Button("戻る") {
+                        model.backHome()
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.white)
+                }
+                .frame(maxWidth: 440)
+                .padding(24)
             case .running:
                 VideoLayerView(layer: station.previewLayer)
                     .ignoresSafeArea()

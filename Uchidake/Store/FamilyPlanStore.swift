@@ -65,7 +65,13 @@ final class FamilyPlanStore {
                   let product = PlanProduct(rawValue: transaction.productID) else { continue }
             current.append(PlanRecord(product: product, expires: transaction.expirationDate))
         }
-        remember(PlanJudge.next(remembered: record, current: current, now: Date()))
+        // 何も返らなかったとき、覚えている購入が取り消されたのかを確かめる
+        var revoked = false
+        if current.isEmpty, let record,
+           case .verified(let latest) = await Transaction.latest(for: record.product.rawValue) {
+            revoked = latest.revocationDate != nil
+        }
+        remember(PlanJudge.next(remembered: record, current: current, revoked: revoked, now: Date()))
     }
 
     func loadProducts() async {

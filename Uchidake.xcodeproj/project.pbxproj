@@ -20,6 +20,7 @@
 		4D19CD42C55859AAC6FD80A3 /* UchidakeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */; };
 		5227BE173BE3D901FC7EAE77 /* PairingKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1902286F732938B6F1A6223F /* PairingKey.swift */; };
 		658D04A45DF787E1414EA37D /* MediaPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6F5B8C733560D808AC89B2 /* MediaPacket.swift */; };
+		6A52043CA672B2949078EF04 /* CameraStationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38F533DA34FC2334D0E2BAE /* CameraStationTests.swift */; };
 		6FED7CB95BB795F7133F6AF9 /* CameraCensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F4D3DE5C2FB435451F2106 /* CameraCensus.swift */; };
 		773C71A56D588BEE9F823433 /* ViewerSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B3EB53BC8764F0DD60F5AA /* ViewerSession.swift */; };
 		7A3FAB90F45708FA5E969F4C /* CameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040969DA06DC00C38782B55A /* CameraCapture.swift */; };
@@ -73,6 +74,7 @@
 		94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		9BC209020781A7AF37A6B8E4 /* ViewerAdmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerAdmission.swift; sourceTree = "<group>"; };
 		A269DFCEE68594D882CF5D37 /* VideoCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCodec.swift; sourceTree = "<group>"; };
+		A38F533DA34FC2334D0E2BAE /* CameraStationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStationTests.swift; sourceTree = "<group>"; };
 		A542E283EBAE7148C81E95FD /* FamilyPlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyPlanStore.swift; sourceTree = "<group>"; };
 		A640931916AC7D858635765C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AC2612F9D98BB310C0034EFD /* StillDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillDecoder.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				7FE554FC2BCE93F7774573D9 /* CameraCensusTests.swift */,
+				A38F533DA34FC2334D0E2BAE /* CameraStationTests.swift */,
 				F0F07E457039D8C22DA90046 /* FamilyPlanStoreTests.swift */,
 				EEC6621C01EB3FE5E3443467 /* FamilyPlanTests.swift */,
 				58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */,
@@ -312,6 +315,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D2B9E83148F7552926759933 /* CameraCensusTests.swift in Sources */,
+				6A52043CA672B2949078EF04 /* CameraStationTests.swift in Sources */,
 				E87073A73EA8AA2AB1D78B93 /* FamilyPlanStoreTests.swift in Sources */,
 				FE040DBFA92E8BD01C5CD568 /* FamilyPlanTests.swift in Sources */,
 				45BB58B07B6E896892BBF0AE /* MediaPacketTests.swift in Sources */,
