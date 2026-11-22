@@ -27,19 +27,32 @@ enum PlanJudge {
         return now < expires.addingTimeInterval(grace)
     }
 
-    /// StoreKit がいま返した権利（`current`）と、覚えていた記録から、次に覚える記録を決める。
-    /// - Parameter revoked: 覚えていた記録の購入が、返金などで取り消されたと StoreKit が言っている
-    static func next(remembered: PlanRecord?, current: [PlanRecord], revoked: Bool, now: Date) -> PlanRecord? {
-        if let lifetime = current.first(where: { $0.expires == nil }) {
-            return lifetime
+    /// RevenueCat から読んだ、家族プランの権利のようす。
+    struct Reading: Equatable {
+        /// 権利が有効なら、そのもとになった商品の ID。有効でなければ nil。
+        var productID: String?
+        /// 月額・年額の期限。買い切りは nil。
+        var expires: Date?
+        /// この情報を RevenueCat のサーバーから受け取った時刻（端末の控えを読んだときは、控えた時刻）
+        var fetchedAt: Date
+    }
+
+    /// 覚えていた記録と、いま読めた権利のようすから、次に覚える記録を決める。
+    /// - Parameter reading: まだ 1 度も読めていなければ nil
+    static func next(remembered: PlanRecord?, reading: Reading?, now: Date) -> PlanRecord? {
+        if let reading, let productID = reading.productID {
+            // 権利が有効。商品が家族プランの 3 つ以外でも（管理画面から付けた権利など）、有効として扱う。
+            let product = PlanProduct(rawValue: productID) ?? (reading.expires == nil ? .lifetime : .monthly)
+            return PlanRecord(product: product, expires: product == .lifetime ? nil : reading.expires)
         }
-        if let latest = current.max(by: { ($0.expires ?? .distantPast) < ($1.expires ?? .distantPast) }) {
-            return latest
+        guard let remembered else { return nil }
+        if let reading {
+            // 権利が無い、と読めた。買い切りなら返金。月額・年額は、期限のあとにサーバーへ聞いた結果なら
+            // 解約や返金なので、ここで終わりにする。
+            guard let expires = remembered.expires, reading.fetchedAt < expires else { return nil }
         }
-        // StoreKit は何も返さなかった。取り消されたとはっきり分かるときだけ消す。
-        // 読み出しが一時的に空になることがあり、それだけで払った人の記録を消してはいけない。
-        guard let remembered, !revoked else { return nil }
-        // 月額・年額は、期限を過ぎても更新を知れないだけかもしれないので、猶予のあいだは残す。
+        // 読めていないか、期限より前の古い控えしか無い（インターネットに出られない端末）。
+        // 更新を知れないだけかもしれないので、猶予のあいだは残す。
         return isActive(remembered, now: now) ? remembered : nil
     }
 }
