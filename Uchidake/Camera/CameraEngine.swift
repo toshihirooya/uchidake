@@ -91,6 +91,8 @@ final class CameraEngine {
     private var ticks = 0
     private var isStopped = false
     private var hasFamilyPlan: Bool
+    /// Bonjour の広告に載せる情報
+    private var advert: CameraAdvert?
 
     init(name: String, key: Data, previewLayer: AVSampleBufferDisplayLayer, hasFamilyPlan: Bool) {
         self.name = name
@@ -102,7 +104,33 @@ final class CameraEngine {
 
     // MARK: - 開始と終了
 
-    func start() {
+    /// 待ち受けと広告だけを始める。撮影は `startCapture()` まで始めない
+    /// （ほかのカメラがいないかの確認が済むまで、撮らないため）。
+    func startListening(advert: CameraAdvert) {
+        queue.async {
+            self.advert = advert
+            self.startListener()
+            self.startTimer()
+        }
+    }
+
+    /// 広告に載せる情報を差し替える（確認が済んだ、家族プランが変わった）。
+    func setAdvert(_ advert: CameraAdvert) {
+        queue.async {
+            self.advert = advert
+            self.listener?.service = self.service
+        }
+    }
+
+    private var service: NWListener.Service {
+        guard let advert else {
+            return NWListener.Service(name: name, type: MediaSecurity.serviceType)
+        }
+        return NWListener.Service(
+            name: name, type: MediaSecurity.serviceType, domain: nil, txtRecord: NWTXTRecord(advert.txt))
+    }
+
+    func startCapture() {
         encoder.onFrame = { [weak self] frame in
             self?.queue.async { self?.sendVideo(frame) }
         }
@@ -130,10 +158,6 @@ final class CameraEngine {
             }
         }
         capture.start()
-        queue.async {
-            self.startListener()
-            self.startTimer()
-        }
     }
 
     func stop() {
@@ -186,7 +210,7 @@ final class CameraEngine {
         guard !isStopped else { return }
         do {
             let listener = try NWListener(using: MediaSecurity.parameters(key: key))
-            listener.service = NWListener.Service(name: name, type: MediaSecurity.serviceType)
+            listener.service = service
             listener.stateUpdateHandler = { [weak self] newState in
                 guard let self, !self.isStopped else { return }
                 switch newState {

@@ -19,14 +19,28 @@ struct CameraView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            VideoLayerView(layer: station.previewLayer)
-                .ignoresSafeArea()
-                .opacity(isDimmed ? 0 : 1)
+            switch station.phase {
+            case .checking:
+                VStack(spacing: 14) {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(.white)
+                    Text("ほかのカメラを確かめています…")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                }
+            case .blocked(let otherName):
+                CameraBlockedView(otherName: otherName)
+            case .running:
+                VideoLayerView(layer: station.previewLayer)
+                    .ignoresSafeArea()
+                    .opacity(isDimmed ? 0 : 1)
 
-            if isDimmed {
-                dimmedContent
-            } else {
-                controls
+                if isDimmed {
+                    dimmedContent
+                } else {
+                    controls
+                }
             }
         }
         .contentShape(Rectangle())
@@ -40,7 +54,7 @@ struct CameraView: View {
             // さわらない時間を見張って、画面を暗くする
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(2))
-                if !isDimmed, station.problem == nil, Date().timeIntervalSince(lastTouch) > Self.dimAfter {
+                if !isDimmed, station.phase == .running, station.problem == nil, Date().timeIntervalSince(lastTouch) > Self.dimAfter {
                     dim()
                 }
             }
