@@ -202,10 +202,13 @@ struct LiveView: View {
                     }
                 }
                 #if DEBUG
-                Text(verbatim: "受信: 映像 \(session.videoFrames) コマ / 音声 \(session.audioPackets) パケット")
-                    .font(.caption2)
-                    .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.7))
+                // `-screenshots YES`（App Store 用の撮影）のときは出さない
+                if !UserDefaults.standard.bool(forKey: "screenshots") {
+                    Text(verbatim: "受信: 映像 \(session.videoFrames) コマ / 音声 \(session.audioPackets) パケット")
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .foregroundStyle(.white.opacity(0.7))
+                }
                 #endif
             }
             .padding(.horizontal, 14)
