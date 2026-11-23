@@ -137,6 +137,7 @@ DTLS の中を流れる 1 データグラムの形式。先頭 1 バイトが種
 | `-autoRole viewer` | 見る側として動かし、最初に見つかったカメラを開く |
 | `-autoPlan family` / `-autoPlan free` | 購入を通さずに、この端末の家族プランの有無を決める |
 | `-screenshots YES` | 見る側の画面の、受信したコマ数・パケット数の表示を消す（App Store 用のスクリーンショットを撮るとき。`scripts/capture_screenshots.sh`） |
+| `-screenshotImage <写真のパス>` | シミュレータのカメラ役で、テスト画像の代わりにその写真を送る（App Store 用のスクリーンショット。`IMAGE=… scripts/capture_screenshots.sh`） |
 | `-autoPhoto YES` | 最初に開いたカメラで、写せるようになったら写真を 1 枚撮る |
 | `-autoRecord <秒>` | 最初に開いたカメラで、つながったら録画を始め、その秒数で止める |
 

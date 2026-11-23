@@ -67,9 +67,15 @@ RevenueCat に独自の ID（`logIn`）や広告 ID を使う連携を足した�
 
 ## スクリーンショットについて
 
-`scripts/capture_screenshots.sh` はシミュレータで撮るので、見る側の映像は色の変わるテスト画像になり、カメラの画面は暗くした状態（動作中の表示だけ）になる。`1-viewer` と `2-camera` は、**実機で部屋やペットを映して撮ったものに差し替えてから** `fastlane metadata` で上げる（テスト画像のままだと、実際の使い方が伝わらず審査で指摘されやすい）。ファイル名と大きさ（iPhone 6.9 インチ 1320×2868、iPad 13 インチ 2064×2752）をそろえれば、そのまま上がる。
+`scripts/capture_screenshots.sh` がシミュレータで撮る（iPhone 6.9 インチ 1320×2868、iPad 13 インチ 2064×2752、日英）。シミュレータにはカメラが無いので、カメラ役には `IMAGE=` で渡した写真を映像として送らせる（デバッグビルドの `-screenshotImage`。docs/spec.md の 9 章）。
 
-**iPad 13 インチのスクリーンショットはまだ無い**（iPad に対応しているので必須）。シミュレータの iPad では、起動が間に合わずに白い画面になったり、窓が狭く表示されたりして安定しなかった。実機の iPad で撮るか、`DEVICES="iPad Pro 13-inch (M5)" WAIT=15 scripts/capture_screenshots.sh` で撮って 1 枚ずつ確かめる。
+```bash
+IMAGE=build/shots/nursery-portrait.jpg DEVICES="iPhone 17 Pro Max,iPad Pro 13-inch (M5)" WAIT=12 scripts/capture_screenshots.sh
+```
+
+- 今の写真は Unsplash の [白いベビーベッドとアームチェアの子ども部屋](https://unsplash.com/photos/a-cozy-nursery-with-a-white-crib-and-armchair-QYwo037ITqk)（Unsplash License。商用利用可、表記不要）。`images.unsplash.com/photo-1774578342155-8d7e44a18bfd?fm=jpg&q=85&w=1600` を取ってきて、ベビーベッドが入るよう縦長に切り抜いた（`sips -c 1067 800 --cropOffset 0 700`）。写真は `build/`（Git に入れない）に置く。
+- カメラの名前は「子ども部屋」「Nursery」。文字の大きさは標準にそろえて起動する（シミュレータの文字の設定が大きくても崩れない）。
+- iPad のステータスバーには、日付とアプリ名が出る（iPadOS の表示で、上書きできない）。
 
 ## 審査で気をつけること
 

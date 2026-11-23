@@ -5,7 +5,7 @@
 #   LANGS="ja" DEVICES="iPhone 17 Pro Max" scripts/capture_screenshots.sh
 #
 # 見る側の画面には、別のシミュレータ（HELPER）をカメラ役にして映像を流す。シミュレータにはカメラが無いので、
-# 映像は色の変わるテスト画像になる（docs/spec.md の8章）。実際の部屋の映像にしたいときは、実機で撮って差し替える。
+# 映像は色の変わるテスト画像になる（docs/spec.md の8章）。IMAGE=<写真のパス> を付けると、その写真を映像として送る。
 # デバッグビルドの起動オプション（docs/spec.md の9章）を使う。
 set -euo pipefail
 
@@ -17,6 +17,7 @@ LANGS=(${=LANGS:-ja en-US})
 DEVICES=("${(@s/,/)DEVICES:-iPhone 17 Pro Max}")
 HELPER=${HELPER:-iPhone 17}
 WAIT=${WAIT:-8}
+IMAGE=${IMAGE:-}
 
 udid() {
   xcrun simctl list devices available -j 2>/dev/null | python3 -c '
@@ -57,7 +58,11 @@ lang_args() {
 launch() {
   local dev=$1; shift
   xcrun simctl terminate "$dev" $BUNDLE 2>/dev/null || true
-  xcrun simctl launch "$dev" $BUNDLE "$@" -screenshots YES >/dev/null
+  local image=()
+  [[ -n $IMAGE ]] && image=(-screenshotImage "${IMAGE:A}")
+  # 文字の大きさは標準にそろえる（シミュレータ側の設定は変えない）
+  xcrun simctl launch "$dev" $BUNDLE "$@" -screenshots YES $image \
+    -UIPreferredContentSizeCategoryName UICTContentSizeCategoryL >/dev/null
 }
 
 shot() {
@@ -79,7 +84,7 @@ fresh_install "$HELPER_ID"
 for lang in $LANGS; do
   mkdir -p "$OUT/$lang"
   la=(${=$(lang_args $lang)})
-  if [[ $lang == ja ]]; then name=リビング; else name="Living Room"; fi
+  if [[ $lang == ja ]]; then name=子ども部屋; else name=Nursery; fi
   for device in $DEVICES; do
     id=$(udid "$device")
     prefix=${device// /_}
