@@ -8,3 +8,5 @@ fastlane/README.md
 *.mobileprovision
 *.cer
 *.p12
+.firebase/
+fastlane/Preview.html

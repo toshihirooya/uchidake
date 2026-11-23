@@ -5,8 +5,14 @@ import SwiftUI
 enum LegalLinks {
     /// Apple の標準の利用規約（EULA）
     static let terms = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
-    /// 仮の URL。プライバシーポリシーのページができたら差し替える（審査に出す前に必要）。
-    static let privacy = URL(string: "https://example.com/uchidake/privacy")!
+    /// プライバシーポリシー。ページはこのリポジトリの site/（Firebase Hosting）。アプリの表示言語に合わせる
+    static var privacy: URL { privacy(language: Bundle.main.preferredLocalizations.first) }
+
+    static func privacy(language: String?) -> URL {
+        URL(string: language == "ja"
+            ? "https://uchidake-camera.web.app/privacy"
+            : "https://uchidake-camera.web.app/en/privacy")!
+    }
 }
 
 /// 家族プランの購入画面。カメラにする端末でも、見る側の端末でも開ける。
