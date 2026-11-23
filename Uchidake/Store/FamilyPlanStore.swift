@@ -6,7 +6,7 @@ import RevenueCat
 enum RevenueCatConfig {
     /// iOS の Public SDK キー（`appl_` で始まる。アプリに入れてよい公開用のキー）。
     /// 空のあいだは RevenueCat を使わず、購入画面は「商品を読み込めませんでした」になる。
-    static let publicSDKKey = ""
+    static let publicSDKKey = "appl_OtLIAKmeMeHlJyMvsLwfrmAtrPq"
     /// 家族プランの権利（Entitlement）の ID。月額・年額・買い切りの 3 商品をこれに結び付ける。
     static let entitlementID = "family"
     /// 購入画面に並べる商品の組（Offering）の ID。月額・年額・買い切りのパッケージを入れる。
