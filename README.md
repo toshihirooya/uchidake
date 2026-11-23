@@ -30,6 +30,26 @@ xcodegen generate
 xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=iOS Simulator,name=iPhone Air' test
 ```
 
+## CI（GitHub Actions）
+
+| ワークフロー | いつ | すること |
+|---|---|---|
+| `.github/workflows/ci.yml` | develop・main 向けの PR | iOS を変えたら、シミュレータでビルドして単体テスト（署名なし）。`site/` を変えたら、ページがそろっているかを確かめる |
+| `.github/workflows/release.yml` | `v*` のタグを push（または手動） | `fastlane beta` で TestFlight に上げる |
+| `.github/workflows/deploy-site.yml` | main で `site/` が変わったとき（または手動） | Firebase Hosting に出す |
+
+テストに使うシミュレータは `scripts/ci_simulator.sh` が、入っている中で最新の iOS の iPhone から選ぶ（`CI_SIMULATOR_NAME` で機種名を指定できる）。
+
+リポジトリの Secrets に次を入れる。証明書リポジトリと App Store Connect API キーは Clipan と同じものを使える。
+
+| Secret | 使うところ | 中身 |
+|---|---|---|
+| `MATCH_PASSWORD` | release | match の証明書リポジトリの復号パスワード |
+| `MATCH_GIT_URL` | release | 証明書リポジトリの HTTPS の URL（`https://github.com/toshihirooya/clipan-certificates.git`） |
+| `MATCH_GIT_BASIC_AUTHORIZATION` | release | `ユーザー名:個人アクセストークン` を base64 にしたもの |
+| `ASC_KEY_ID`・`ASC_ISSUER_ID`・`ASC_KEY_CONTENT` | release | App Store Connect API キー（`ASC_KEY_CONTENT` は .p8 を base64 にしたもの） |
+| `FIREBASE_SERVICE_ACCOUNT_BASE64` | deploy-site | `uchidake-camera` の Firebase Hosting に出せるサービスアカウントの JSON を base64 にしたもの |
+
 ## 家族プランの購入を試す
 
 課金は RevenueCat の SDK を使う。RevenueCat の Public SDK キーを `Uchidake/Store/FamilyPlanStore.swift` の `RevenueCatConfig.publicSDKKey` に入れ、RevenueCat 側に権利 `family` と Offering `default`（月額・年額・買い切り）を作ると、最初の画面の「家族プラン」から購入・復元を試せる。Xcode からシミュレータで実行すると、`Uchidake/FamilyPlan.storekit` の商品が使われる（購入の取り消しは Xcode の Debug > StoreKit > Manage Transactions）。キーが空のあいだは、購入画面は「商品を読み込めませんでした」になる。購入を通さずに台数の制限だけを試すときは、起動オプション `-autoPlan family` / `-autoPlan free` を使う（`docs/spec.md` の9章）。

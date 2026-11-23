@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  # 手で流したいとき（Actions の画面から）
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # -----------------------------------------------
+  # 変更されたパスを検出
+  # -----------------------------------------------
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ios: ${{ steps.result.outputs.ios }}
+      site: ${{ steps.result.outputs.site }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            ios:
+              - 'Uchidake/**'
+              - 'UchidakeTests/**'
+              - 'Uchidake.xcodeproj/**'
+              - 'project.yml'
+              - 'scripts/ci_simulator.sh'
+              - '.github/workflows/ci.yml'
+            site:
+              - 'site/**'
+              - 'firebase.json'
+              - '.github/workflows/ci.yml'
+
+      # 手で流したときは全部動かす
+      - name: Collect result
+        id: result
+        env:
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          IOS: ${{ steps.filter.outputs.ios }}
+          SITE: ${{ steps.filter.outputs.site }}
+        run: |
+          if [ "$MANUAL" = "true" ]; then IOS=true; SITE=true; fi
+          echo "ios=$IOS" >> "$GITHUB_OUTPUT"
+          echo "site=$SITE" >> "$GITHUB_OUTPUT"
+          echo "ios=$IOS site=$SITE"
+
+  # -----------------------------------------------
+  # iOS ビルド＆単体テスト
+  # 公開リポジトリなので macOS ランナーも無料枠を気にせず、iOS を変えた PR では毎回動かす。
+  # シミュレータ向けなので署名（match）は要らない
+  # -----------------------------------------------
+  ios-test:
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Cache SPM packages
+        uses: actions/cache@v4
+        with:
+          path: .spm-cache
+          # SDK の版は Package.resolved で固定している。版を上げたらキャッシュも切り替わる
+          key: spm-${{ runner.os }}-${{ hashFiles('Uchidake.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Resolve SPM dependencies
+        run: |
+          # Package.resolved と食い違うときは、黙って別の版に解決せず失敗させる
+          xcodebuild -resolvePackageDependencies \
+            -project Uchidake.xcodeproj \
+            -scheme Uchidake \
+            -clonedSourcePackagesDirPath "$GITHUB_WORKSPACE/.spm-cache" \
+            -onlyUsePackageVersionsFromResolvedFile
+
+      - name: Pick simulator
+        id: sim
+        run: |
+          udid="$(scripts/ci_simulator.sh)"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          # 先に起動しておく（テスト開始時の起動待ちで落ちることがあるため）
+          xcrun simctl bootstatus "$udid" -b
+
+      # シミュレータ向けの既定の署名（ad-hoc。証明書は不要）で動かす。
+      # 失敗を見逃さないよう、continue-on-error は付けない
+      - name: Build and test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Uchidake.xcodeproj \
+            -scheme Uchidake \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -parallel-testing-enabled NO \
+            -clonedSourcePackagesDirPath "$GITHUB_WORKSPACE/.spm-cache" \
+            -onlyUsePackageVersionsFromResolvedFile \
+            -resultBundlePath "$RUNNER_TEMP/Uchidake.xcresult" \
+            -quiet
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Uchidake-xcresult
+          path: ${{ runner.temp }}/Uchidake.xcresult
+          retention-days: 7
+
+  # -----------------------------------------------
+  # 紹介サイト（Firebase Hosting）の検証
+  # -----------------------------------------------
+  site-validate:
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate firebase.json
+        run: |
+          python3 -c "import json; json.load(open('firebase.json'))"
+          echo "  firebase.json syntax: OK"
+
+      # App Store のメタデータ（fastlane/metadata/*/privacy_url.txt）が指しているページ
+      - name: Check pages exist
+        run: |
+          for f in site/index.html site/privacy.html site/en/index.html site/en/privacy.html; do
+            if [ -f "$f" ]; then echo "  $f: OK"; else echo "::error::$f がない"; exit 1; fi
+          done
