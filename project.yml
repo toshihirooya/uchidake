@@ -27,7 +27,12 @@ targets:
       properties:
         # アプリ名と許可ダイアログの文言は、言語ごとに InfoPlist.xcstrings で差し替わる（ここは日本語の元）
         CFBundleDisplayName: うちだけカメラ
+        # 版と build 番号は build settings から入れる（fastlane beta が build 番号を上書きできるように）
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}
+        # 暗号は OS 標準の DTLS（Network.framework）だけなので、輸出規制の申告は免除。アップロードのたびの質問を省く
+        ITSAppUsesNonExemptEncryption: false
         # ローカルネットワーク利用の許可ダイアログに表示される文言
         NSLocalNetworkUsageDescription: 家の中にあるカメラと、映像を見る端末をつなぐために、ローカルネットワークを使用します。
         # Bonjourで広告・探索するサービス種別（MediaSecurity.serviceType と一致させる）
