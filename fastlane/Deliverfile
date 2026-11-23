@@ -1,0 +1,6 @@
+# upload_to_app_store（fastlane metadata）の設定
+app_identifier("com.toshihirooya.uchidake")
+metadata_path("./fastlane/metadata")
+screenshots_path("./fastlane/screenshots")
+# 価格・年齢制限・プライバシーの詳細は App Store Connect の画面で決める（docs/app-store.md）
+automatic_release(false)

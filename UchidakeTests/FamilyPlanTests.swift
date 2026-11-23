@@ -80,4 +80,10 @@ final class FamilyPlanTests: XCTestCase {
             XCTAssertEqual(try JSONDecoder().decode(PlanRecord.self, from: data), record)
         }
     }
+
+    func testPrivacyLinkFollowsAppLanguage() {
+        XCTAssertEqual(LegalLinks.privacy(language: "ja").absoluteString, "https://uchidake-camera.web.app/privacy")
+        XCTAssertEqual(LegalLinks.privacy(language: "en").absoluteString, "https://uchidake-camera.web.app/en/privacy")
+        XCTAssertEqual(LegalLinks.privacy(language: nil).absoluteString, "https://uchidake-camera.web.app/en/privacy")
+    }
 }

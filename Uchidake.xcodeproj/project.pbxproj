@@ -15,6 +15,7 @@
 		36CF99F1CB71D4413081E8A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */; };
 		395C79FF973023DC59CE3687 /* ViewerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF63E9D5AC1C35BC86F20333 /* ViewerEngine.swift */; };
 		3AB0792645406236A25B1205 /* CameraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C77C72C46580053FB3D12C /* CameraEngine.swift */; };
+		41504F0619B85F845197A84E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5DA6B143A8DA1B3F21D554F4 /* PrivacyInfo.xcprivacy */; };
 		45BB58B07B6E896892BBF0AE /* MediaPacketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */; };
 		4D19CD42C55859AAC6FD80A3 /* UchidakeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */; };
 		5227BE173BE3D901FC7EAE77 /* PairingKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1902286F732938B6F1A6223F /* PairingKey.swift */; };
@@ -68,6 +69,7 @@
 		4CCAC1612BBFA5142BAE3670 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		51F49E5CDB05A26905321A88 /* Problem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Problem.swift; sourceTree = "<group>"; };
 		58191DD5AC7A4E832B23D966 /* MediaPacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPacketTests.swift; sourceTree = "<group>"; };
+		5DA6B143A8DA1B3F21D554F4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		7FE554FC2BCE93F7774573D9 /* CameraCensusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCensusTests.swift; sourceTree = "<group>"; };
 		859E8D611D2E2E748F18B2B3 /* CameraStation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStation.swift; sourceTree = "<group>"; };
 		94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				A640931916AC7D858635765C /* Info.plist */,
 				2A435ACFA943AD9AA183BE2D /* InfoPlist.xcstrings */,
 				94F766E3D1D4A14A633B77DE /* Localizable.xcstrings */,
+				5DA6B143A8DA1B3F21D554F4 /* PrivacyInfo.xcprivacy */,
 				51F49E5CDB05A26905321A88 /* Problem.swift */,
 				1D7E95E2876AB1BF58F29245 /* UchidakeApp.swift */,
 				51AE45D9575C1415089E76B6 /* Camera */,
@@ -308,6 +311,7 @@
 				36CF99F1CB71D4413081E8A3 /* Assets.xcassets in Resources */,
 				E2EB51F5174B6F87C8D1FBB6 /* InfoPlist.xcstrings in Resources */,
 				E6B49511A909A6CCCB26A872 /* Localizable.xcstrings in Resources */,
+				41504F0619B85F845197A84E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

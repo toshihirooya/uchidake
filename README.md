@@ -34,6 +34,14 @@ xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=i
 
 課金は RevenueCat の SDK を使う。RevenueCat の Public SDK キーを `Uchidake/Store/FamilyPlanStore.swift` の `RevenueCatConfig.publicSDKKey` に入れ、RevenueCat 側に権利 `family` と Offering `default`（月額・年額・買い切り）を作ると、最初の画面の「家族プラン」から購入・復元を試せる。Xcode からシミュレータで実行すると、`Uchidake/FamilyPlan.storekit` の商品が使われる（購入の取り消しは Xcode の Debug > StoreKit > Manage Transactions）。キーが空のあいだは、購入画面は「商品を読み込めませんでした」になる。購入を通さずに台数の制限だけを試すときは、起動オプション `-autoPlan family` / `-autoPlan free` を使う（`docs/spec.md` の9章）。
 
+## App Store に出す
+
+手順と、App Store Connect で答える内容は [docs/app-store.md](docs/app-store.md)。プライバシーポリシーとサポートページは `site/`（Firebase Hosting、`firebase deploy --only hosting`）、ストアの説明文は `fastlane/metadata/`。
+
+```bash
+bundle exec fastlane beta
+```
+
 ## 構成
 
 | 場所 | 中身 |
