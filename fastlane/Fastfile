@@ -40,4 +40,50 @@ platform :ios do
     register_devices(devices: { options[:name] => options[:udid] })
     match(type: "development", readonly: false, force_for_new_devices: true)
   end
+
+  desc "App Store Connect にアプリの記録を作る（最初の 1 回だけ。Apple ID でのログインが要る）"
+  lane :create_app do
+    produce(
+      app_name: "うちだけカメラ",
+      language: "ja",
+      sku: "uchidake",
+      skip_devcenter: true
+    )
+  end
+
+  desc "Release でビルドして TestFlight に上げる。build 番号は TestFlight の最新 + 1"
+  desc "例: bundle exec fastlane beta"
+  lane :beta do
+    asc_auth
+    match(type: "appstore", readonly: true)
+    build = latest_testflight_build_number(initial_build_number: 0) + 1
+    build_app(
+      project: "Uchidake.xcodeproj",
+      scheme: "Uchidake",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      xcargs: "CURRENT_PROJECT_VERSION=#{build}"
+    )
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+  end
+
+  desc "説明文・キーワード・URL・審査用メモ・スクリーンショットを App Store Connect に上げる（審査には出さない）"
+  desc "中身は fastlane/metadata と fastlane/screenshots"
+  lane :metadata do
+    asc_auth
+    upload_to_app_store(
+      skip_binary_upload: true,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      force: true,
+      # App Store Connect API キーではアプリ内課金を確かめられないため
+      precheck_include_in_app_purchases: false
+    )
+  end
+
+  desc "シミュレータで App Store 用のスクリーンショットを撮る（fastlane/screenshots に出る）"
+  lane :screenshots do
+    sh("../scripts/capture_screenshots.sh")
+  end
 end
