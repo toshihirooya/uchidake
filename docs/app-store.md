@@ -27,7 +27,7 @@
      - `com.toshihirooya.uchidake.family.monthly` 月額 300 円、導入オファー 7 日間無料
      - `com.toshihirooya.uchidake.family.yearly` 年額 1,500 円
    - 非消耗型 `com.toshihirooya.uchidake.family.lifetime` 3,000 円
-   - 3 つともファミリー共有をオン。表示名・説明（日英）と、審査用のスクリーンショット（購入画面）を付ける。
+   - 3 つともファミリー共有をオン。表示名・説明（日英）と、審査用のスクリーンショット（購入画面）を付ける。配信地域はアプリと同じ（下の「価格と配信」）。
    - 最初の版の審査に、この 3 つを一緒に出す（版のページの「App 内課金とサブスクリプション」で選ぶ）。
 4. **RevenueCat**: プロジェクトに iOS アプリを足し、App Store Connect の In-App Purchase キー（または共有シークレット）を登録する。Entitlement `family` に 3 商品を結び、Offering `default` に月額・年額・買い切りのパッケージを入れる。**Public SDK キー（`appl_…`）を `Uchidake/Store/FamilyPlanStore.swift` の `RevenueCatConfig.publicSDKKey` に入れる**（空のままだと購入画面が「商品を読み込めませんでした」になり、審査で落ちる）。
 5. **App Review の電話番号**: `fastlane/metadata/review_information/` には入れていない。画面の「App Review に関する情報」で入れる。
@@ -58,7 +58,15 @@ RevenueCat に独自の ID（`logIn`）や広告 ID を使う連携を足した�
 ### 価格と配信
 
 - 価格: 無料（家族プランはアプリ内課金）
-- 配信地域: 日本語と英語に対応しているので、まずは全地域でよい。
+- 配信地域: 日本語と英語しか無いので、**日本と、英語が公用語の 59 の国と地域**だけにする。アプリと課金 3 商品で同じ範囲にそろえる。
+  - JPN USA GBR CAN AUS NZL IRL
+  - アジア: SGP HKG IND PHL MYS PAK
+  - アフリカ: ZAF NGA KEN GHA UGA TZA RWA ZMB ZWE BWA NAM MWI SLE LBR GMB MUS SYC SWZ CMR
+  - カリブ海など: JAM BHS BRB TTO ATG DMA GRD KNA LCA VCT BLZ GUY AIA BMU CYM MSR TCA VGB
+  - 太平洋: FJI PNG SLB VUT TON NRU PLW FSM
+  - ヨーロッパ: MLT（EU なので、DSA のトレーダー情報の登録が要る）
+  - 中国本土は入れない（ICP 届出番号が要るため）。
+  - 「新しい国や地域で自動的に配信」はオフにする（アプリは「価格および配信状況」の画面で。API では変えられない）。
 - iPad: 対応（`TARGETED_DEVICE_FAMILY = 1,2`）。iPad のスクリーンショットも要る。
 
 ### カテゴリ
