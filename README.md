@@ -30,6 +30,16 @@ xcodegen generate
 xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=iOS Simulator,name=iPhone Air' test
 ```
 
+### PR を出す前の確認
+
+develop 向けの PR では CI の iOS ジョブが動かないので、PR を作る前に手元で CI と同じ確認を通す。シミュレータの選択・起動、ビルド＋単体テスト、サイトのページの確認までを一度に行い、最後に件数を出す。
+
+```bash
+scripts/check.sh
+```
+
+`--ios` で iOS だけ、`--site` でサイトだけ。テスト結果は `build/check/Uchidake.xcresult`（Xcode で開ける）。
+
 ## CI（GitHub Actions）
 
 | ワークフロー | いつ | すること |
