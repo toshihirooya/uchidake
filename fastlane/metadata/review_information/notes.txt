@@ -1,0 +1,19 @@
+This app needs TWO devices (iPhone + iPhone or iPad) on the SAME Wi-Fi network. One becomes the camera, the other watches it. There is no login and no server: video and audio go directly between the two devices over the local network (Bonjour + DTLS).
+
+How to test:
+1. Device A: open the app, allow Local Network, tap "Start fresh". A QR code appears.
+2. Device B: open the app, allow Local Network, tap "Scan QR code" and scan the QR code on Device A.
+3. Device A: tap "Start camera" (allow Camera and Microphone).
+4. Device B: tap "Find cameras", then tap the camera in the list. Live video and sound appear. Hold "Hold to talk" to speak through Device A.
+
+Permissions:
+- Local Network: to find and connect to the camera inside the home.
+- Camera: to stream video when the device is the camera, and to scan the pairing QR code.
+- Microphone: to stream sound while someone is watching, and for push-to-talk.
+- Photo Library (add only): to save photos/recordings taken while watching.
+
+Background audio (UIBackgroundModes: audio): on the watching device, the user can lock the screen or leave the app and keep LISTENING to the camera's live sound (e.g. a baby monitor at night). Audio plays continuously while connected; it stops when the user closes the viewer.
+
+In-app purchase: "Family Plan" (monthly with 7-day free trial / yearly / lifetime) lets 4 devices watch one camera at once and allows more than one camera. Open it from the "Family Plan" card on the home screen. Everything works for free with one camera and one viewer.
+
+The camera screen always shows that the camera is running and how many devices are watching, to discourage hidden recording.

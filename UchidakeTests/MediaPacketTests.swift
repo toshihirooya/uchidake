@@ -1,3 +1,4 @@
+import CoreImage
 import XCTest
 @testable import Uchidake
 
@@ -8,13 +9,55 @@ final class MediaPacketTests: XCTestCase {
             .video(frameID: 0x0102_0304, index: 3, count: 7, payload: Data([9, 8, 7])),
             .audio(sequence: 42, pcm: Data([1, 2, 3, 4])),
             .keyframeRequest,
-            .keepAlive,
+            .keepAlive(isRecording: true, viewerID: nil),
             .status(status),
             .command(.switchCamera, sequence: 0xDEAD_BEEF),
         ]
         for packet in packets {
             XCTAssertEqual(MediaPacket(packet.encoded()), packet)
         }
+    }
+
+    func testKeepAliveCarriesRecordingFlag() {
+        XCTAssertEqual(MediaPacket.keepAlive(isRecording: true, viewerID: nil).encoded(), Data([4, 1]))
+        XCTAssertEqual(MediaPacket.keepAlive(isRecording: false, viewerID: nil).encoded(), Data([4, 0]))
+        XCTAssertEqual(MediaPacket(Data([4, 1])), .keepAlive(isRecording: true, viewerID: nil))
+        XCTAssertEqual(MediaPacket(Data([4, 0xFE])), .keepAlive(isRecording: false, viewerID: nil))  // ほかのビットは無視
+    }
+
+    func testKeepAliveCarriesViewerID() {
+        let packet = MediaPacket.keepAlive(isRecording: true, viewerID: 0x0102_0304_0506_0708)
+        XCTAssertEqual(packet.encoded(), Data([4, 1, 1, 2, 3, 4, 5, 6, 7, 8]))
+        XCTAssertEqual(MediaPacket(packet.encoded()), packet)
+    }
+
+    func testKeepAliveWithoutIDIsReadAsNoID() {
+        XCTAssertEqual(MediaPacket(Data([4, 1])), .keepAlive(isRecording: true, viewerID: nil))
+        XCTAssertEqual(MediaPacket(Data([4, 0, 9, 9])), .keepAlive(isRecording: false, viewerID: nil))  // 半端な長さ
+    }
+
+    func testRefusalRoundTrips() {
+        XCTAssertEqual(MediaPacket.refusal(.freeLimit).encoded(), Data([7, 1]))
+        XCTAssertEqual(MediaPacket(Data([7, 2])), .refusal(.familyLimit))
+        XCTAssertNil(MediaPacket(Data([7])))
+        XCTAssertNil(MediaPacket(Data([7, 99])))
+    }
+
+    func testOldKeepAliveWithoutFlagMeansNotRecording() {
+        XCTAssertEqual(MediaPacket(Data([4])), .keepAlive(isRecording: false, viewerID: nil))
+    }
+
+    func testStatusWithoutRecordersDecodesAsZero() throws {
+        let old = #"{"name":"リビング","battery":80,"isCharging":true,"viewers":2,"usesFrontCamera":false}"#
+        var data = Data([5]); data.append(Data(old.utf8))
+        guard case .status(let status) = MediaPacket(data) else { return XCTFail() }
+        XCTAssertEqual(status.recorders, 0)
+        XCTAssertEqual(status.viewers, 2)
+    }
+
+    func testStatusRecordersSurvivesEncodingAndDecoding() {
+        let status = CameraStatus(name: "a", battery: nil, isCharging: false, viewers: 3, usesFrontCamera: true, recorders: 2)
+        XCTAssertEqual(MediaPacket(MediaPacket.status(status).encoded()), .status(status))
     }
 
     func testVideoHeaderLayoutIsBigEndian() {
@@ -153,31 +196,49 @@ final class VideoAssemblerTests: XCTestCase {
     }
 }
 
-final class PassphraseKeyTests: XCTestCase {
-    func testSameKeyRegardlessOfSurroundingSpaceAndUnicodeForm() {
-        let composed = "がっこうのあいことば"
-        let decomposed = composed.decomposedStringWithCanonicalMapping
-        XCTAssertNotEqual(Array(composed.utf8), Array(decomposed.utf8))
-        let key = PassphraseKey.derive(from: composed)
-        XCTAssertNotNil(key)
-        XCTAssertEqual(key?.count, 32)
-        XCTAssertEqual(PassphraseKey.derive(from: "  \(decomposed)\n"), key)
+final class PairingKeyTests: XCTestCase {
+    func testGeneratedKeysAreRandomAndFullLength() {
+        let first = PairingKey.generate()
+        XCTAssertEqual(first?.count, 32)
+        XCTAssertNotEqual(first, PairingKey.generate())
     }
 
-    func testDifferentPassphrasesGiveDifferentKeys() {
-        XCTAssertNotEqual(PassphraseKey.derive(from: "correct-horse-1"), PassphraseKey.derive(from: "correct-horse-2"))
+    func testCodeRoundTrip() throws {
+        let key = try XCTUnwrap(PairingKey.generate())
+        let code = PairingKey.code(for: key)
+        XCTAssertTrue(code.hasPrefix("UCHIDAKE1:"))
+        XCTAssertEqual(code.count, 10 + 43)
+        XCTAssertEqual(PairingKey.key(fromCode: code), key)
+        XCTAssertEqual(PairingKey.key(fromCode: "  \(code)\n"), key)
     }
 
-    func testMinimumLength() {
-        XCTAssertFalse(PassphraseKey.isValid("1234567"))
-        XCTAssertFalse(PassphraseKey.isValid("  1234567  "))
-        XCTAssertTrue(PassphraseKey.isValid("12345678"))
+    func testCodeUsesURLSafeAlphabetWithoutPadding() {
+        // 0xFB 0xFF … は、ふつうの base64 だと + と / が出る
+        let key = Data([0xFB, 0xFF] + [UInt8](repeating: 0xFE, count: 30))
+        let text = PairingKey.base64URL(key)
+        XCTAssertFalse(text.contains("+") || text.contains("/") || text.contains("="))
+        XCTAssertEqual(PairingKey.key(base64URL: text), key)
     }
 
-    func testSuggestionIsValidAndVaries() {
-        let first = PassphraseKey.suggestion()
-        XCTAssertTrue(PassphraseKey.isValid(first))
-        XCTAssertEqual(first.count, 14)
-        XCTAssertNotEqual(first, PassphraseKey.suggestion())
+    func testRejectsOtherCodes() {
+        let valid = PairingKey.base64URL(Data(repeating: 7, count: 32))
+        XCTAssertNil(PairingKey.key(fromCode: "https://example.com/"))
+        XCTAssertNil(PairingKey.key(fromCode: valid))  // 先頭の目印が無い
+        XCTAssertNil(PairingKey.key(fromCode: "UCHIDAKE2:" + valid))
+        XCTAssertNil(PairingKey.key(fromCode: "UCHIDAKE1:"))
+        XCTAssertNil(PairingKey.key(fromCode: "UCHIDAKE1:" + PairingKey.base64URL(Data(repeating: 7, count: 31))))
+        XCTAssertNil(PairingKey.key(fromCode: "UCHIDAKE1:" + PairingKey.base64URL(Data(repeating: 7, count: 33))))
+        XCTAssertNil(PairingKey.key(fromCode: "UCHIDAKE1:" + String(valid.dropLast()) + "!"))
+    }
+
+    func testQRImageDecodesBackToTheKey() throws {
+        let key = try XCTUnwrap(PairingKey.generate())
+        let image = try XCTUnwrap(PairingKey.qrImage(for: key))
+        let cgImage = try XCTUnwrap(image.cgImage)
+        let context = CIContext(options: [.useSoftwareRenderer: true])
+        let detector = try XCTUnwrap(CIDetector(ofType: CIDetectorTypeQRCode, context: context, options: nil))
+        let features = detector.features(in: CIImage(cgImage: cgImage))
+        let message = try XCTUnwrap((features.first as? CIQRCodeFeature)?.messageString)
+        XCTAssertEqual(PairingKey.key(fromCode: message), key)
     }
 }

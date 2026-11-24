@@ -2,6 +2,26 @@ import AVFoundation
 import Foundation
 import Network
 
+/// 見る側ごとの「録画中」を数える。`CameraEngine` の `queue` の上で使う。
+struct RecorderTally {
+    private var recording: Set<ObjectIdentifier> = []
+
+    var count: Int { recording.count }
+
+    /// 生存通知を受けたとき。数が変わったら true。
+    mutating func update(viewer: ObjectIdentifier, isRecording: Bool) -> Bool {
+        if isRecording {
+            return recording.insert(viewer).inserted
+        }
+        return recording.remove(viewer) != nil
+    }
+
+    /// 見る側が切れたとき。数が変わったら true。
+    mutating func remove(viewer: ObjectIdentifier) -> Bool {
+        recording.remove(viewer) != nil
+    }
+}
+
 /// カメラ側の本体。映像と音を撮り、つないできた見る側すべてに送る。
 ///
 /// 待ち受けは UDP（DTLS）で、Bonjour にカメラの名前で広告する。
@@ -11,12 +31,15 @@ import Network
 final class CameraEngine {
     struct Snapshot: Equatable {
         var viewerCount = 0
+        /// 録画している見る側の数
+        var recorderCount = 0
         var usesFrontCamera = false
         /// 待ち受けできないときの理由
-        var problem: String?
+        var problem: Problem?
     }
 
-    static let maxViewers = 4
+    /// 上限に達しているとき、つないできた相手の最初の生存通知をこれだけ待つ
+    private static let admissionWait: TimeInterval = 2
     /// これだけ何も届かない見る側は、いなくなったものとして切る
     private static let viewerTimeout: TimeInterval = 6
 
@@ -26,6 +49,13 @@ final class CameraEngine {
     private final class Viewer {
         let connection: NWConnection
         var isReady = false
+        /// 見る側として受け入れたか。映像・音・状態を送るのは、受け入れた相手だけ。
+        var isAdmitted = false
+        /// 断ることにした（理由を送り終えたら切る）
+        var isRefused = false
+        /// 生存通知に付いてきた、見る側の端末の ID。古い版は付けない。
+        var id: UInt64?
+        var readySince = Date()
         var lastHeard = Date()
         /// 実行済みの操作の通し番号（同じ操作が複数回届くため）
         var handledCommands: Set<UInt32> = []
@@ -52,6 +82,7 @@ final class CameraEngine {
     private var viewers: [Viewer] = []
     private var timer: DispatchSourceTimer?
     private var snapshot = Snapshot()
+    private var recorders = RecorderTally()
     private var nextFrameID: UInt32 = 0
     private var nextAudioSequence: UInt32 = 0
     private var battery: Int?
@@ -59,9 +90,13 @@ final class CameraEngine {
     private var isAudioRunning = false
     private var ticks = 0
     private var isStopped = false
+    private var hasFamilyPlan: Bool
+    /// Bonjour の広告に載せる情報
+    private var advert: CameraAdvert?
 
-    init(name: String, key: Data, previewLayer: AVSampleBufferDisplayLayer) {
+    init(name: String, key: Data, previewLayer: AVSampleBufferDisplayLayer, hasFamilyPlan: Bool) {
         self.name = name
+        self.hasFamilyPlan = hasFamilyPlan
         self.key = key
         self.previewLayer = previewLayer
         capture = CameraCapture(label: name)
@@ -69,7 +104,41 @@ final class CameraEngine {
 
     // MARK: - 開始と終了
 
-    func start() {
+    /// 待ち受けと広告だけを始める。撮影は `startCapture()` まで始めない
+    /// （ほかのカメラがいないかの確認が済むまで、撮らないため）。
+    func startListening(advert: CameraAdvert) {
+        queue.async {
+            self.advert = advert
+            self.startListener()
+            self.startTimer()
+        }
+    }
+
+    /// 広告に載せる情報を差し替える（確認が済んだ、家族プランが変わった）。
+    func setAdvert(_ advert: CameraAdvert) {
+        queue.async {
+            guard self.advert != advert else { return }
+            self.advert = advert
+            // 動いている待ち受けの広告を書き換えると、新しい接続を受けられなくなる。
+            // 待ち受けを作り直す（つながっている見る側は、そのまま残る）。
+            guard !self.isStopped, let old = self.listener else { return }
+            old.stateUpdateHandler = nil
+            old.newConnectionHandler = nil
+            old.cancel()
+            self.listener = nil
+            self.startListener()
+        }
+    }
+
+    private var service: NWListener.Service {
+        guard let advert else {
+            return NWListener.Service(name: name, type: MediaSecurity.serviceType)
+        }
+        return NWListener.Service(
+            name: name, type: MediaSecurity.serviceType, domain: nil, txtRecord: NWTXTRecord(advert.txt))
+    }
+
+    func startCapture() {
         encoder.onFrame = { [weak self] frame in
             self?.queue.async { self?.sendVideo(frame) }
         }
@@ -97,10 +166,6 @@ final class CameraEngine {
             }
         }
         capture.start()
-        queue.async {
-            self.startListener()
-            self.startTimer()
-        }
     }
 
     func stop() {
@@ -131,6 +196,14 @@ final class CameraEngine {
         capture.switchCamera()
     }
 
+    /// この端末の家族プランが変わった。新しくつなぐ相手から、新しい上限を使う。
+    /// いま見ている相手は切らない。
+    func setFamilyPlan(_ active: Bool) {
+        queue.async {
+            self.hasFamilyPlan = active
+        }
+    }
+
     /// 電池の状態を伝える（見る側への状態の通知に載せる）。
     func setBattery(level: Int?, isCharging: Bool) {
         queue.async {
@@ -145,7 +218,7 @@ final class CameraEngine {
         guard !isStopped else { return }
         do {
             let listener = try NWListener(using: MediaSecurity.parameters(key: key))
-            listener.service = NWListener.Service(name: name, type: MediaSecurity.serviceType)
+            listener.service = service
             listener.stateUpdateHandler = { [weak self] newState in
                 guard let self, !self.isStopped else { return }
                 switch newState {
@@ -153,9 +226,9 @@ final class CameraEngine {
                     self.snapshot.problem = nil
                 case .waiting(let error):
                     // ローカルネットワークの許可が無いときなどはここに来る
-                    self.snapshot.problem = "待ち受けを待機中: \(error.localizedDescription)"
+                    self.snapshot.problem = .listenerWaiting(error.localizedDescription)
                 case .failed(let error):
-                    self.snapshot.problem = "待ち受けに失敗: \(error.localizedDescription)"
+                    self.snapshot.problem = .listenerFailed(error.localizedDescription)
                     self.listener?.cancel()
                     self.listener = nil
                     // 少し待ってやり直す
@@ -178,13 +251,14 @@ final class CameraEngine {
             listener.start(queue: queue)
             self.listener = listener
         } catch {
-            snapshot.problem = "待ち受けを開始できません: \(error.localizedDescription)"
+            snapshot.problem = .listenerUnavailable(error.localizedDescription)
             publish()
         }
     }
 
     private func accept(_ connection: NWConnection) {
-        guard viewers.count < Self.maxViewers else {
+        // 保留中の相手も含めた、接続の数そのものの上限
+        guard viewers.count < ViewerAdmission.limit(hasFamilyPlan: true) + 4 else {
             connection.cancel()
             return
         }
@@ -194,14 +268,15 @@ final class CameraEngine {
             guard let self, let viewer else { return }
             switch newState {
             case .ready:
-                // DTLS のハンドシェイクが通った。合言葉が同じ端末。
+                // DTLS のハンドシェイクが通った。鍵が同じ端末。
                 viewer.isReady = true
                 viewer.lastHeard = Date()
+                viewer.readySince = Date()
                 self.receive(from: viewer)
-                self.viewersChanged()
-                // 途中から見始めた人がすぐ映像を出せるよう、キーフレームを送る
-                self.encoder.requestKeyframe()
-                self.sendStatus()
+                // 空きがあればすぐ入れる。上限のときは、最初の生存通知（端末の ID）を待って決める。
+                if self.admitted.count < ViewerAdmission.limit(hasFamilyPlan: self.hasFamilyPlan) {
+                    self.admit(viewer)
+                }
             case .failed, .cancelled:
                 self.remove(viewer)
             default:
@@ -211,18 +286,58 @@ final class CameraEngine {
         connection.start(queue: queue)
     }
 
+    private var admitted: [Viewer] {
+        viewers.filter(\.isAdmitted)
+    }
+
+    private func admit(_ viewer: Viewer) {
+        viewer.isAdmitted = true
+        viewersChanged()
+        // 途中から見始めた人がすぐ映像を出せるよう、キーフレームを送る
+        encoder.requestKeyframe()
+        sendStatus()
+    }
+
+    /// 保留中の相手を、入れるか・入れ替えるか・断るか決める。
+    private func settle(_ viewer: Viewer) {
+        guard !viewer.isAdmitted, !viewer.isRefused else { return }
+        let current = admitted
+        switch ViewerAdmission.decide(newID: viewer.id, admitted: current.map(\.id), hasFamilyPlan: hasFamilyPlan) {
+        case .admit:
+            admit(viewer)
+        case .replace(let index):
+            remove(current[index])
+            admit(viewer)
+        case .refuse(let reason):
+            viewer.isRefused = true
+            let packet = MediaPacket.refusal(reason).encoded()
+            // 届かないことがあるので 3 回送り、送り終えるのを少し待ってから切る
+            for _ in 0..<3 {
+                viewer.connection.send(content: packet, completion: .idempotent)
+            }
+            queue.asyncAfter(deadline: .now() + 0.5) { [weak self, weak viewer] in
+                guard let self, let viewer else { return }
+                self.remove(viewer)
+            }
+        }
+    }
+
     private func remove(_ viewer: Viewer) {
         guard let index = viewers.firstIndex(where: { $0 === viewer }) else { return }
         viewers.remove(at: index)
         viewer.connection.stateUpdateHandler = nil
         viewer.connection.cancel()
+        // 録画を止めずに消えた見る側は、ここで数から外す
+        if recorders.remove(viewer: ObjectIdentifier(viewer)) {
+            snapshot.recorderCount = recorders.count
+        }
         viewersChanged()
         sendStatus()
     }
 
     /// 見ている人の数が変わった。マイクは、誰かが見ているあいだだけ使う。
     private func viewersChanged() {
-        let count = viewers.filter(\.isReady).count
+        let count = admitted.count
         setHasViewers(count > 0)
         if count > 0, !isAudioRunning {
             audio.start(useMicrophone: true)
@@ -265,9 +380,14 @@ final class CameraEngine {
 
     private func tick() {
         let now = Date()
-        // 準備中のまま進まない接続（合言葉が違う相手など）も、ここで片付ける
+        // 準備中のまま進まない接続（鍵が違う相手など）も、ここで片付ける
         for viewer in viewers where now.timeIntervalSince(viewer.lastHeard) > Self.viewerTimeout {
             remove(viewer)
+        }
+        // 生存通知を送ってこない保留中の相手（古い版など）も、待ちすぎずに決める
+        for viewer in viewers where viewer.isReady && !viewer.isAdmitted
+            && now.timeIntervalSince(viewer.readySince) > Self.admissionWait {
+            settle(viewer)
         }
         ticks += 1
         if ticks % 2 == 0 {
@@ -278,7 +398,7 @@ final class CameraEngine {
     // MARK: - 送信
 
     private func sendToAll(_ packet: Data) {
-        for viewer in viewers where viewer.isReady {
+        for viewer in viewers where viewer.isAdmitted {
             viewer.connection.send(content: packet, completion: .idempotent)
         }
     }
@@ -299,7 +419,8 @@ final class CameraEngine {
     private func sendStatus() {
         let status = CameraStatus(
             name: name, battery: battery, isCharging: isCharging,
-            viewers: snapshot.viewerCount, usesFrontCamera: snapshot.usesFrontCamera)
+            viewers: snapshot.viewerCount, usesFrontCamera: snapshot.usesFrontCamera,
+            recorders: snapshot.recorderCount)
         sendToAll(MediaPacket.status(status).encoded())
     }
 
@@ -319,9 +440,28 @@ final class CameraEngine {
     }
 
     private func handle(_ packet: MediaPacket, from viewer: Viewer) {
+        if case .keepAlive(_, let id) = packet {
+            if viewer.id == nil {
+                viewer.id = id
+            }
+            if !viewer.isAdmitted {
+                settle(viewer)
+            } else if let id {
+                // 空きがあってすぐ入れた相手が、つなぎ直した同じ端末だった。古いほうを片付ける。
+                for old in admitted where old !== viewer && old.id == id {
+                    remove(old)
+                }
+            }
+        }
+        // 受け入れていない相手の操作や声は通さない
+        guard viewer.isAdmitted else { return }
         switch packet {
-        case .keepAlive:
-            break
+        case .keepAlive(let isRecording, _):
+            if recorders.update(viewer: ObjectIdentifier(viewer), isRecording: isRecording) {
+                snapshot.recorderCount = recorders.count
+                publish()
+                sendStatus()  // 2 秒待たせず知らせる
+            }
         case .keyframeRequest:
             encoder.requestKeyframe()
         case .audio(_, let pcm):
@@ -333,7 +473,7 @@ final class CameraEngine {
             case .switchCamera:
                 capture.switchCamera()
             }
-        case .video, .status:
+        case .video, .status, .refusal:
             break  // カメラが送る側のパケット
         }
     }

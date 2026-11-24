@@ -1,0 +1,1268 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
+    },
+    "%@／年" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / year"
+          }
+        }
+      }
+    },
+    "%@／月" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / month"
+          }
+        }
+      }
+    },
+    "%lld台が見ています（音も送っています）" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld device is watching (sound is on too)"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld devices are watching (sound is on too)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld台が視聴中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld watching"
+          }
+        }
+      }
+    },
+    "1 台のカメラを、同時に 4 台まで見られます（無料は 1 台）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 4 devices can watch one camera at once (1 on the free plan)"
+          }
+        }
+      }
+    },
+    "1 台のカメラを同時に 4 台まで見られ、カメラを 2 台以上使えます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch one camera on up to 4 devices at once, and use two or more cameras."
+          }
+        }
+      }
+    },
+    "1 台目に表示される QR コードを、2 台目の端末で読み取る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan the QR code shown on the first device with your second device"
+          }
+        }
+      }
+    },
+    "1 台目の端末" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First device"
+          }
+        }
+      }
+    },
+    "1 台目の端末で「新しく始める」を押す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On your first device, tap “Start fresh”"
+          }
+        }
+      }
+    },
+    "2 台目からの端末" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Second device or later"
+          }
+        }
+      }
+    },
+    "2 台目を追加" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your second device"
+          }
+        }
+      }
+    },
+    "QR コードを表示" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show QR code"
+          }
+        }
+      }
+    },
+    "QR コードを読み取る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan QR code"
+          }
+        }
+      }
+    },
+    "「QR コードを読み取る」を押す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap “Scan QR code”"
+          }
+        }
+      }
+    },
+    "「写真」への追加が許可されていません。設定アプリで許可してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adding to Photos isn't allowed. Allow it in the Settings app."
+          }
+        }
+      }
+    },
+    "いまは誰も見ていません" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one is watching right now"
+          }
+        }
+      }
+    },
+    "この QR コードは家の鍵と同じです。写真に撮ったり、人に送ったりしないでください。写した人は映像を見られます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This QR code is like your house key. Don't photograph it or send it to anyone. Whoever has it can watch your video."
+          }
+        }
+      }
+    },
+    "この iPhone をカメラにする" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this iPhone as a camera"
+          }
+        }
+      }
+    },
+    "このアプリの QR コードではありません。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This QR code isn't from this app."
+          }
+        }
+      }
+    },
+    "このカメラは、いま 4 台が見ています。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 devices are already watching this camera."
+          }
+        }
+      }
+    },
+    "このカメラは、いま別の端末が見ています。カメラの端末を家族プランにすると、同時に 4 台まで見られます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another device is watching this camera right now. With the Family Plan on the camera device, up to 4 devices can watch at once."
+          }
+        }
+      }
+    },
+    "この家では、すでに「%@」がカメラとして動いています。カメラを 2 台以上使うには、家族プランが必要です。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” is already running as a camera in this home. To use two or more cameras, you need the Family Plan."
+          }
+        }
+      }
+    },
+    "この端末ではカメラを使えません。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The camera isn't available on this device."
+          }
+        }
+      }
+    },
+    "この端末で新しい鍵を作ります。続けて、2 台目に読み取らせる QR コードを表示します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This creates a new key on this device, then shows a QR code for your second device to scan."
+          }
+        }
+      }
+    },
+    "この端末の鍵を消して、最初の設定からやり直します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This erases the key on this device and starts setup over."
+          }
+        }
+      }
+    },
+    "この端末は、どちらですか?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which one is this device?"
+          }
+        }
+      }
+    },
+    "すでに始めている端末で「端末を追加」を押し、表示された QR コードをこの端末で読み取ります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On a device that is already set up, tap “Add a device”, then scan the QR code it shows with this device."
+          }
+        }
+      }
+    },
+    "つながりません。この端末をカメラと同じ QR コードで設定したか、カメラの端末でアプリが開いているかを確かめてください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't connect. Check that this device was set up with the same QR code as the camera, and that the app is open on the camera."
+          }
+        }
+      }
+    },
+    "ほかのカメラを確かめています…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking for other cameras…"
+          }
+        }
+      }
+    },
+    "ほかの端末が録画中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another device is recording"
+          }
+        }
+      }
+    },
+    "ほかの端末ですでに始めているときは、ここは押さずに「QR コードを読み取る」を使ってください。別の鍵になり、つながりません。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you have already started on another device, don't tap this. Use “Scan QR code” instead. Otherwise this device gets a different key and can't connect."
+          }
+        }
+      }
+    },
+    "ほかの端末とは、同じ QR コードで設定し直すまでつながらなくなります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device can't connect to your other devices until you set it up again with the same QR code."
+          }
+        }
+      }
+    },
+    "ほかの端末をつなぐときは、下の「端末を追加」から QR コードを表示します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To connect another device, show the QR code from “Add a device” below."
+          }
+        }
+      }
+    },
+    "もう 1 台の iPhone / iPad をつなぐときは、この端末に QR コードを表示して、追加する端末で読み取ります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To connect another iPhone or iPad, show a QR code on this device and scan it with the one you are adding."
+          }
+        }
+      }
+    },
+    "もう一度試す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
+          }
+        }
+      }
+    },
+    "やめる" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "カメラ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera"
+          }
+        }
+      }
+    },
+    "カメラにする iPhone でアプリを開き、「カメラを始める」を押してください。同じ Wi-Fi にいるか、近くにあれば見つかります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the app on the iPhone you want to use as a camera and tap “Start camera”. It will show up here if it's on the same Wi-Fi or nearby."
+          }
+        }
+      }
+    },
+    "カメラにする端末と、映像を見る端末で、同じ鍵を持ちます。鍵が同じ端末どうしだけがつながり、通信は暗号化されます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The camera and the devices you watch from share one key. Only devices with the same key can connect, and everything they send is encrypted."
+          }
+        }
+      }
+    },
+    "カメラにつないでいます…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting to the camera…"
+          }
+        }
+      }
+    },
+    "カメラの使用が許可されていません。設定アプリで「%@」のカメラを許可してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera access is off. Allow the camera for “%@” in the Settings app."
+          }
+        }
+      }
+    },
+    "カメラの名前（例: リビング）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera name (e.g. Living room)"
+          }
+        }
+      }
+    },
+    "カメラの電池が少なくなっています" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The camera's battery is low"
+          }
+        }
+      }
+    },
+    "カメラを 2 台以上使えます（無料は 1 台）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use two or more cameras (1 on the free plan)"
+          }
+        }
+      }
+    },
+    "カメラを始める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start camera"
+          }
+        }
+      }
+    },
+    "カメラを探しています…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Looking for cameras…"
+          }
+        }
+      }
+    },
+    "カメラを探す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find cameras"
+          }
+        }
+      }
+    },
+    "カメラを止めますか？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop the camera?"
+          }
+        }
+      }
+    },
+    "カメラを止める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop camera"
+          }
+        }
+      }
+    },
+    "カメラを選ぶ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a camera"
+          }
+        }
+      }
+    },
+    "カメラ動作中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera is on"
+          }
+        }
+      }
+    },
+    "サブスクリプションを管理" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Subscriptions"
+          }
+        }
+      }
+    },
+    "プライバシーポリシー" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy Policy"
+          }
+        }
+      }
+    },
+    "マイクが許可されていないので、話しかけられません。設定アプリで許可してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can't talk because microphone access is off. Turn it on in the Settings app."
+          }
+        }
+      }
+    },
+    "一度の支払いで、ずっと使えます" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pay once, keep it forever"
+          }
+        }
+      }
+    },
+    "下の QR コードを写す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Point it at the QR code below"
+          }
+        }
+      }
+    },
+    "使い始めるまで" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to get started"
+          }
+        }
+      }
+    },
+    "使っていない iPhone を、見守りたい場所に置きます。充電しながら、アプリを開いたままにしてください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place a spare iPhone where you want to keep watch. Keep it charging with the app open."
+          }
+        }
+      }
+    },
+    "保存できませんでした。次にアプリを開いたとき、もう一度試します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save. We'll try again the next time you open the app."
+          }
+        }
+      }
+    },
+    "充電しながら、この画面を開いたままにしてください。\nしばらくすると画面が暗くなります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep this iPhone charging with this screen open.\nThe screen will dim after a while."
+          }
+        }
+      }
+    },
+    "内容を見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See Details"
+          }
+        }
+      }
+    },
+    "写真を保存しました" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo saved"
+          }
+        }
+      }
+    },
+    "写真を保存できませんでした。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the photo."
+          }
+        }
+      }
+    },
+    "写真を撮る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take photo"
+          }
+        }
+      }
+    },
+    "利用規約" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of Use"
+          }
+        }
+      }
+    },
+    "前面カメラに切り替える" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to front camera"
+          }
+        }
+      }
+    },
+    "動画を保存しています…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving video…"
+          }
+        }
+      }
+    },
+    "動画を保存しました" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video saved"
+          }
+        }
+      }
+    },
+    "商品を読み込めませんでした。通信を確かめて、もう一度試してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t load the products. Check your connection and try again."
+          }
+        }
+      }
+    },
+    "家の中で動いているカメラを探して、映像と音を確認します。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find a camera running in your home, then watch and listen."
+          }
+        }
+      }
+    },
+    "家族プラン" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family Plan"
+          }
+        }
+      }
+    },
+    "家族プランが有効です" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Family Plan is active"
+          }
+        }
+      }
+    },
+    "家族プランは、カメラにする端末で有効にします。カメラの端末で、購入した Apple Account（またはファミリー共有の家族）でサインインして、「購入を復元」を押してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Family Plan is turned on at the camera device. On the camera device, sign in with the Apple Account that bought it (or a Family Sharing member’s) and tap “Restore Purchases.”"
+          }
+        }
+      }
+    },
+    "家族プランを見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See the Family Plan"
+          }
+        }
+      }
+    },
+    "年額" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly"
+          }
+        }
+      }
+    },
+    "待ち受けに失敗: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopped accepting viewers: %@"
+          }
+        }
+      }
+    },
+    "待ち受けを待機中: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting to accept viewers: %@"
+          }
+        }
+      }
+    },
+    "待ち受けを開始できません: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't accept viewers: %@"
+          }
+        }
+      }
+    },
+    "戻る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        }
+      }
+    },
+    "承認を待っています。承認されると、自動で有効になります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for approval. It will turn on automatically once approved."
+          }
+        }
+      }
+    },
+    "押しているあいだ話しかける" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold to talk"
+          }
+        }
+      }
+    },
+    "押して話す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold to talk"
+          }
+        }
+      }
+    },
+    "探索に失敗: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't look for cameras: %@"
+          }
+        }
+      }
+    },
+    "探索を待機中: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting to look for cameras: %@"
+          }
+        }
+      }
+    },
+    "新しく始める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start fresh"
+          }
+        }
+      }
+    },
+    "映像は、家の中の端末どうしでだけやり取りします" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video stays between the devices in your home"
+          }
+        }
+      }
+    },
+    "映像を見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        }
+      }
+    },
+    "最初の 7 日間は無料" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free for the first 7 days"
+          }
+        }
+      }
+    },
+    "月額" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly"
+          }
+        }
+      }
+    },
+    "月額・年額は、期間が終わる 24 時間前までに解約しないかぎり、自動で更新されます。解約は、設定アプリの Apple Account の「サブスクリプション」からできます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly and yearly plans renew automatically unless cancelled at least 24 hours before the period ends. You can cancel under Subscriptions in your Apple Account in the Settings app."
+          }
+        }
+      }
+    },
+    "案内を閉じる" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss this tip"
+          }
+        }
+      }
+    },
+    "準備ができました" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're all set"
+          }
+        }
+      }
+    },
+    "片方をカメラにして置き、もう片方で映像を見る" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set one down as the camera and watch from the other"
+          }
+        }
+      }
+    },
+    "画面をタップすると戻ります" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the screen to wake it"
+          }
+        }
+      }
+    },
+    "空き容量が少ないので、録画できません。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough free space to record."
+          }
+        }
+      }
+    },
+    "空き容量が少なくなったので、録画を止めて保存しました。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free space is low, so the recording was stopped and saved."
+          }
+        }
+      }
+    },
+    "端末をつなぐ準備" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get your devices ready"
+          }
+        }
+      }
+    },
+    "端末を追加" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a device"
+          }
+        }
+      }
+    },
+    "端末を追加するための QR コード" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR code for adding a device"
+          }
+        }
+      }
+    },
+    "背面カメラに切り替える" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to back camera"
+          }
+        }
+      }
+    },
+    "見ている端末が録画しています" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A viewer is recording"
+          }
+        }
+      }
+    },
+    "見ている端末には映像が届かなくなります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devices that are watching will stop receiving video."
+          }
+        }
+      }
+    },
+    "見守りたい場所に置く端末で「カメラを始める」を、手元の端末で「カメラを探す」を押してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap “Start camera” on the device you leave where you want to watch, and “Find cameras” on the device you keep with you."
+          }
+        }
+      }
+    },
+    "設定をやり直す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start setup over"
+          }
+        }
+      }
+    },
+    "設定を開く" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        }
+      }
+    },
+    "設定済みの端末で「端末を追加」を押し、表示された QR コードを枠に入れてください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On a device that is already set up, tap “Add a device”, then fit the QR code it shows in the frame."
+          }
+        }
+      }
+    },
+    "話しています" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Talking"
+          }
+        }
+      }
+    },
+    "読み取りが済んだら、次へ" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done scanning? Continue"
+          }
+        }
+      }
+    },
+    "買い切り" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lifetime"
+          }
+        }
+      }
+    },
+    "買い切りで使えるのは、家の中で使う機能です。今後、外出先から見る機能を足す場合は、別の月額プランになります。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The lifetime purchase covers features used inside your home. If watching from outside the home is added later, it will be a separate monthly plan."
+          }
+        }
+      }
+    },
+    "買い切りを購入しました。月額・年額は自動では止まらないので、「サブスクリプションを管理」から解約してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You bought the lifetime purchase. Your monthly or yearly subscription does not stop by itself, so cancel it from “Manage Subscriptions.”"
+          }
+        }
+      }
+    },
+    "購入が見つかりませんでした。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No purchase was found."
+          }
+        }
+      }
+    },
+    "購入できませんでした。もう一度試してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The purchase didn’t go through. Please try again."
+          }
+        }
+      }
+    },
+    "購入を復元" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Purchases"
+          }
+        }
+      }
+    },
+    "追加する端末で、%@を開く" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open %@ on the device you are adding"
+          }
+        }
+      }
+    },
+    "録画を保存できませんでした。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the recording."
+          }
+        }
+      }
+    },
+    "録画を始める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start recording"
+          }
+        }
+      }
+    },
+    "録画を止める" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop recording"
+          }
+        }
+      }
+    },
+    "鍵を作りました。続けて、もう 1 台の端末をつなぎます。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The key is ready. Next, connect one more device."
+          }
+        }
+      }
+    },
+    "鍵を保存できませんでした。もう一度試してください。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the key. Please try again."
+          }
+        }
+      }
+    },
+    "鍵を消してやり直す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase key and start over"
+          }
+        }
+      }
+    },
+    "閉じる" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "音を出す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unmute"
+          }
+        }
+      }
+    },
+    "音を消す" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mute"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
