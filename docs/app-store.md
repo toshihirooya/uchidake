@@ -58,13 +58,13 @@ RevenueCat に独自の ID（`logIn`）や広告 ID を使う連携を足した�
 ### 価格と配信
 
 - 価格: 無料（家族プランはアプリ内課金）
-- 配信地域: 日本語と英語しか無いので、**日本と、英語が公用語の 59 の国と地域**だけにする。アプリと課金 3 商品で同じ範囲にそろえる。
+- 配信地域: 日本語と英語しか無いので、**日本と、英語が公用語の 58 の国と地域**だけにする。アプリと課金 3 商品で同じ範囲にそろえる。
   - JPN USA GBR CAN AUS NZL IRL
   - アジア: SGP HKG IND PHL MYS PAK
   - アフリカ: ZAF NGA KEN GHA UGA TZA RWA ZMB ZWE BWA NAM MWI SLE LBR GMB MUS SYC SWZ CMR
   - カリブ海など: JAM BHS BRB TTO ATG DMA GRD KNA LCA VCT BLZ GUY AIA BMU CYM MSR TCA VGB
   - 太平洋: FJI PNG SLB VUT TON NRU PLW FSM
-  - ヨーロッパ: MLT（EU なので、DSA のトレーダー情報の登録が要る）
+  - EU の国（マルタなど）は入れない（DSA のトレーダー情報を登録すると、住所・電話番号が EU の App Store に公開されるため）。
   - 中国本土は入れない（ICP 届出番号が要るため）。
   - 「新しい国や地域で自動的に配信」はオフにする（アプリは「価格および配信状況」の画面で。API では変えられない）。
 - iPad: 対応（`TARGETED_DEVICE_FAMILY = 1,2`）。iPad のスクリーンショットも要る。
