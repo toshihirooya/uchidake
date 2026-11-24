@@ -57,12 +57,15 @@ jobs:
 
   # -----------------------------------------------
   # iOS ビルド＆単体テスト
-  # 公開リポジトリなので macOS ランナーも無料枠を気にせず、iOS を変えた PR では毎回動かす。
+  # リリースの関門として、main 向けの PR（release/* → main など）でだけ動かす。
+  # develop 向けの PR では動かさない（テストは手元で ⌘U）。Actions の画面から手で流すこともできる。
   # シミュレータ向けなので署名（match）は要らない
   # -----------------------------------------------
   ios-test:
     needs: changes
-    if: needs.changes.outputs.ios == 'true'
+    if: >-
+      needs.changes.outputs.ios == 'true' &&
+      (github.base_ref == 'main' || github.event_name == 'workflow_dispatch')
     runs-on: macos-26
     timeout-minutes: 30
     steps:

@@ -34,7 +34,7 @@ xcodebuild -project Uchidake.xcodeproj -scheme Uchidake -destination 'platform=i
 
 | ワークフロー | いつ | すること |
 |---|---|---|
-| `.github/workflows/ci.yml` | develop・main 向けの PR | iOS を変えたら、シミュレータでビルドして単体テスト（署名なし）。`site/` を変えたら、ページがそろっているかを確かめる |
+| `.github/workflows/ci.yml` | develop・main 向けの PR（または手動） | main 向けの PR で iOS を変えていたら、シミュレータでビルドして単体テスト（署名なし。develop 向けの PR では動かさない）。`site/` を変えたら、ページがそろっているかを確かめる |
 | `.github/workflows/release.yml` | `v*` のタグを push（または手動） | `fastlane beta` で TestFlight に上げる |
 | `.github/workflows/deploy-site.yml` | main で `site/` が変わったとき（または手動） | Firebase Hosting に出す |
 
