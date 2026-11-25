@@ -11,6 +11,11 @@ default_platform(:ios)
 # 証明書リポジトリの復号には MATCH_PASSWORD が要る（未設定なら入力を求められる）。
 
 platform :ios do
+  # CI（GitHub Actions）では一時キーチェーンを作り、match の証明書をそこに入れる
+  before_all do
+    setup_ci if is_ci
+  end
+
   private_lane :asc_auth do
     if ENV["ASC_KEY_ID"] && ENV["ASC_ISSUER_ID"] && ENV["ASC_KEY_CONTENT"]
       app_store_connect_api_key(
