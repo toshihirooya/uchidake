@@ -1,0 +1,55 @@
+name: Release to TestFlight
+
+# v1.0.0 のようなタグを push したとき（または Actions の画面から手で流したとき）、
+# Release でビルドして TestFlight に上げる（fastlane beta）。審査への提出は人間が行う
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release-ios:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      # 版は .ruby-version、gem は Gemfile.lock で固定している
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # 証明書は match の証明書リポジトリから読むだけ（Matchfile で readonly）。
+      # CI では Fastfile の before_all が setup_ci で一時キーチェーンを作る
+      - name: Build and upload to TestFlight
+        run: bundle exec fastlane beta
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gym-logs
+          path: ~/Library/Logs/gym
+          retention-days: 7

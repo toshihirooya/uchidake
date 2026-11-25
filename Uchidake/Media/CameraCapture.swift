@@ -139,6 +139,15 @@ final class CameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         self.timer = timer
     }
 
+    #if DEBUG
+    private static let screenshotImage: UIImage? = UserDefaults.standard.string(forKey: "screenshotImage")
+        .flatMap { UIImage(contentsOfFile: $0) }
+        .flatMap { image in
+            // 向きの情報を反映した画像にしてから描く
+            UIGraphicsImageRenderer(size: image.size).image { _ in image.draw(at: .zero) }
+        }
+    #endif
+
     private func makeTestFrame() -> CVPixelBuffer? {
         let width = 480
         let height = 640
@@ -160,6 +169,18 @@ final class CameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         ) else { return nil }
 
         frameCount += 1
+        #if DEBUG
+        // `-screenshotImage <パス>`: テスト画像の代わりに、その写真を送る（App Store 用のスクリーンショット）
+        if let image = Self.screenshotImage {
+            let scale = max(CGFloat(width) / image.size.width, CGFloat(height) / image.size.height)
+            let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+            let rect = CGRect(x: (CGFloat(width) - size.width) / 2, y: (CGFloat(height) - size.height) / 2,
+                              width: size.width, height: size.height)
+            context.interpolationQuality = .high
+            context.draw(image.cgImage!, in: rect)
+            return pixelBuffer
+        }
+        #endif
         // 背景の色がゆっくり変わり、白い帯が上下に動く。止まっていないことが一目で分かる。
         let hue = CGFloat(frameCount % 300) / 300
         context.setFillColor(UIColor(hue: hue, saturation: 0.6, brightness: 0.7, alpha: 1).cgColor)

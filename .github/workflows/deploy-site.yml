@@ -1,0 +1,47 @@
+name: Deploy Site
+
+# 紹介サイト・プライバシーポリシー（site/）を Firebase Hosting に出す。
+# App Store のメタデータがこのページを指しているので、main に入ったものだけを出す
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'firebase.json'
+      - '.github/workflows/deploy-site.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-hosting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Decode service account
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+        run: echo "$FIREBASE_SERVICE_ACCOUNT_BASE64" | base64 --decode > "$RUNNER_TEMP/sa.json"
+
+      # プロジェクトは .firebaserc の default（uchidake-camera）
+      - name: Deploy Hosting
+        run: npx firebase-tools deploy --only hosting --non-interactive
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+
+      - name: Cleanup
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"
